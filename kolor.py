@@ -1,0 +1,36 @@
+przyciemnienie = 0.80
+rozjasnienie = 1.20
+
+# Kolory
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (153, 204, 51)
+RED = (139, 0, 0)
+YELLOW = (255, 255, 51)
+PINK = (255, 105, 180)
+GREY = (200, 200, 200)
+ORANGE = (255, 165, 0)
+WHITE = (255, 255, 255)
+BEIGE = (255, 248, 220)
+BROWN = (153, 51, 51)
+DGREY = (112, 128, 144)
+PERU = (218, 165, 32)
+DARKKHAKI = (189, 183, 107)
+CHOCOLATE = (160, 82, 45)
+LIME = (50, 205, 50)
+#LIME = (127, 225, 0)
+REDJ = (225, 0, 0)
+
+PGREEN = (GREEN[0] * przyciemnienie, GREEN[1] * przyciemnienie, GREEN[2] * przyciemnienie)
+PYELLOW = (YELLOW[0] * przyciemnienie, YELLOW[1] * przyciemnienie, YELLOW[2] * przyciemnienie)
+PBROWN = (BROWN[0] * przyciemnienie, BROWN[1] * przyciemnienie, BROWN[2] * przyciemnienie)
+PBEIGE = (BEIGE[0] * przyciemnienie, BEIGE[1] * przyciemnienie, BEIGE[2] * przyciemnienie)
+PGREY = (GREY[0] * przyciemnienie, GREY[1] * przyciemnienie, GREY[2] * przyciemnienie)
+PDGREY = (DGREY[0] * przyciemnienie, DGREY[1] * przyciemnienie, DGREY[2] * przyciemnienie)
+PPERU = (PERU[0] * przyciemnienie, PERU[1] * przyciemnienie, PERU[2] * przyciemnienie)
+PDARKKHAKI = (DARKKHAKI[0] * przyciemnienie, DARKKHAKI[1] * przyciemnienie, DARKKHAKI[2] * przyciemnienie)
+
+RGREY = (GREY[0] * rozjasnienie, GREY[1] * rozjasnienie, GREY[2] * rozjasnienie)
+# RREDJ = (255, REDJ[1] * rozjasnienie * 2, REDJ[2] * rozjasnienie * 2)
+RREDJ = (255, 69, 0)
+RLIME = (127, 255, 0)
