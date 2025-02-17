@@ -44,6 +44,7 @@ class MessageFromClient(object):
             return True
         return False
     
+    
     def startGame(self, players, board):
         playerW = None
         playerS = None
@@ -54,8 +55,8 @@ class MessageFromClient(object):
                 playerS = player_
         parcel = {
             'playerW': playerW.to_dict(),
-           # 'playerS': playerS.to_dict(),
-           # 'board': board.to_dict()
+            'playerS': playerS.to_dict(),
+            'board': board.to_dict()
             }
         return parcel
 

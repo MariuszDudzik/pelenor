@@ -1,6 +1,7 @@
 class Pawn(object):
 
-    def __init__(self, name, nationality, type, membership, stageDeploy, forceHand = None, 
+    def __init__(self, name = None, nationality = None, type = None, membership = None, 
+                 stageDeploy = None, forceHand = None, 
                  forceHandR = None, forceShot = None, forceShotR = None, shotRange = None, 
                  defence = None, defenceR = None, morale = None, moraleR = None, 
                  demoralizationPoint = None, authority = None, authorityR = None, 
@@ -52,34 +53,34 @@ class Pawn(object):
             'forceHand': self.forceHand,
             'forceHandR': self.forceHandR,
             'forceShot': self.forceShot,
-            # 'forceShotR': self.forceShotR,
-            # 'shotRange': self.shotRange,
-            # 'defence': self.defence,
-            # 'defenceR': self.defenceR,
-            # 'morale': self.morale,
-            # 'moraleR': self.moraleR,
-            # 'demoralizationPoint': self.demoralizationPoint,
-            # 'authority': self.authority,
-            # 'authorityR': self.authorityR,
-            # 'spellPower': self.spellPower,
-            # 'movement': self.movement,
-            # 'isRewers': self.isRewers,
-            # 'QRS': self.QRS,
-            # 'graphics': self.graphics,
-            # 'surface': self.surface,
-            # 'coordinatesXY': self.coordinatesXY,
-            # 'fanatic': self.fanatic,
-            # 'demoralizaztion': self.demoralizaztion,
-            # 'rewers': self.rewers,
-            # 'distracted': self.distracted,
-            # 'gatherOfdistracted': self.gatherOfdistracted,
-            # 'makeMove': self.makeMove,
-            # 'castSpell': self.castSpell,
-            # 'shot': self.shot,
-            # 'fight': self.fight,
-            # 'siege': self.siege,
-            # 'deploy': self.deploy,
-            # 'tar': self.tar
+            'forceShotR': self.forceShotR,
+            'shotRange': self.shotRange,
+            'defence': self.defence,
+            'defenceR': self.defenceR,
+            'morale': self.morale,
+             'moraleR': self.moraleR,
+            'demoralizationPoint': self.demoralizationPoint,
+            'authority': self.authority,
+            'authorityR': self.authorityR,
+            'spellPower': self.spellPower,
+            'movement': self.movement,
+            'isRewers': self.isRewers,
+            'QRS': self.QRS,
+            'graphics': self.graphics,
+            'surface': self.surface,
+            'coordinatesXY': self.coordinatesXY,
+            'fanatic': self.fanatic,
+            'demoralizaztion': self.demoralizaztion,
+            'rewers': self.rewers,
+            'distracted': self.distracted,
+            'gatherOfdistracted': self.gatherOfdistracted,
+            'makeMove': self.makeMove,
+            'castSpell': self.castSpell,
+            'shot': self.shot,
+            'fight': self.fight,
+            'siege': self.siege,
+            'deploy': self.deploy,
+            'tar': self.tar
         }
     
     def from_dict(self, data):
@@ -91,32 +92,32 @@ class Pawn(object):
         self.forceHand = data.get('forceHand')
         self.forceHandR = data.get('forceHandR')
         self.forceShot = data.get('forceShot')
-        # self.forceShotR = data.get('forceShotR')
-        # self.shotRange = data.get('shotRange')
-        # self.defence = data.get('defence')
-        # self.defenceR = data.get('defenceR')
-        # self.morale = data.get('morale')
-        # self.moraleR = data.get('moraleR')
-        # self.demoralizationPoint = data.get('demoralizationPoint')
-        # self.authority = data.get('authority')
-        # self.authorityR = data.get('authorityR')
-        # self.spellPower = data.get('spellPower')
-        # self.movement = data.get('movement')
-        # self.isRewers = data.get('isRewers')
-        # self.QRS = data.get('QRS')
-        # self.graphics = data.get('graphics')
-        # self.surface = data.get('surface')
-        # self.coordinatesXY = data.get('coordinatesXY')
-        # self.fanatic = data.get('fanatic', False)
-        # self.demoralizaztion = data.get('demoralizaztion', False)
-        # self.rewers = data.get('rewers', False)
-        # self.distracted = data.get('distracted', False)
-        # self.gatherOfdistracted = data.get('gatherOfdistracted', 0)
-        # self.makeMove = data.get('makeMove', False)
-        # self.castSpell = data.get('castSpell', False)
-        # self.shot = data.get('shot', False)
-        # self.fight = data.get('fight', False)
-        # self.siege = data.get('siege', False)
-        # self.deploy = data.get('deploy', False)
-        # self.tar = data.get('tar', [])
+        self.forceShotR = data.get('forceShotR')
+        self.shotRange = data.get('shotRange')
+        self.defence = data.get('defence')
+        self.defenceR = data.get('defenceR')
+        self.morale = data.get('morale')
+        self.moraleR = data.get('moraleR')
+        self.demoralizationPoint = data.get('demoralizationPoint')
+        self.authority = data.get('authority')
+        self.authorityR = data.get('authorityR')
+        self.spellPower = data.get('spellPower')
+        self.movement = data.get('movement')
+        self.isRewers = data.get('isRewers')
+        self.QRS = data.get('QRS')
+        self.graphics = data.get('graphics')
+        self.surface = data.get('surface')
+        self.coordinatesXY = data.get('coordinatesXY')
+        self.fanatic = data.get('fanatic', False)
+        self.demoralizaztion = data.get('demoralizaztion', False)
+        self.rewers = data.get('rewers', False)
+        self.distracted = data.get('distracted', False)
+        self.gatherOfdistracted = data.get('gatherOfdistracted', 0)
+        self.makeMove = data.get('makeMove', False)
+        self.castSpell = data.get('castSpell', False)
+        self.shot = data.get('shot', False)
+        self.fight = data.get('fight', False)
+        self.siege = data.get('siege', False)
+        self.deploy = data.get('deploy', False)
+        self.tar = data.get('tar', [])
         return self

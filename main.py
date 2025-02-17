@@ -4,7 +4,6 @@ import game
 import menu
 import client
 import gamecontroller
-import threading
 
 def main():
     
@@ -15,12 +14,9 @@ def main():
     connection_ = client.Client(gameController_, game_)
     menu_ = menu.Menu(screen_.get_width(), screen_.get_height(), gameController_, connection_)
     
-
     try:
         connection_.startConnection()
-        threading.Thread(target=connection_.pingServer).start()
-        threading.Thread(target=connection_.receiveData).start()
-        threading.Thread(target=connection_.gameClient).start()
+
         while True:
             mousePosition = pygame.mouse.get_pos()
             if not gameController_.getInGame():
@@ -28,6 +24,7 @@ def main():
                 menu_.countSessionLabel.changeText(f"Liczba sesji: {gameController_.getCountOpenSessions()}")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
+                        connection_.close_connection()
                         pygame.quit()
                         quit()
                     elif event.type == pygame.MOUSEBUTTONDOWN:   

@@ -4,7 +4,6 @@ import field
 class Board(object):
     def __init__(self):
         self.hexes = {}
-
         self._addHex()
 
 

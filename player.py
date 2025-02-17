@@ -30,7 +30,7 @@ class Player(object):
                                         w[18], w[19], w[20], w[21], w[22])
                     listOfArmy.append(unit)
         return listOfArmy
-      
+       
 
       def to_dict(self):
         return {
@@ -59,15 +59,14 @@ class Player(object):
         return self
        
 
-
       def setUnits(self, units):
         self.units = units
 
 
       def getUnits(self):
         return self.units
-
-     
+   
+   
       def shuffle(self):
         random.shuffle(self.units)
 

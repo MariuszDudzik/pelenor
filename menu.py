@@ -13,11 +13,7 @@ class Menu(object):
         self.scroll_offset = 0  
         self.selectedIdx = -1
 
-        self.test = control_obj.Button(40, 
-            40, screenWidth * 0.7, screenHeight * 0.02, 
-            kolor.DGREY, "testn", None, int(screenHeight * 0.045), kolor.WHITE, 
-            self.test, None, None, None)    
-
+         
         self.choiceSbutton = control_obj.Button(screenWidth / 2 - screenWidth * 0.14, 
             screenHeight / 3 - screenHeight * 0.09, screenWidth * 0.14, screenHeight * 0.065, 
             kolor.DGREY, "Sauron", None, int(screenHeight * 0.045), kolor.WHITE, 
@@ -64,7 +60,6 @@ class Menu(object):
        
 
     def drawMenu(self, screen):
-        self.test.draw(screen)
         self.choiceSbutton.draw(screen)
         self.choiceWbutton.draw(screen)
         self.createButton.draw(screen)
@@ -81,7 +76,6 @@ class Menu(object):
 
     def handleEvent(self, mousePosition, event):
         self.loginTextInactive()
-        self.test.handle_event(mousePosition, event)
         self.choiceSbutton.handle_event(mousePosition, event)
         self.choiceWbutton.handle_event(mousePosition, event)
         self.createButton.handle_event(mousePosition, event)
@@ -99,10 +93,6 @@ class Menu(object):
             else:
                 newText = self.loginText.getText() + event.unicode
                 self.loginText.changeText(support.Validation.validateText(newText))
-
-
-    def test(self):
-        print(self.gameController.inGame)
 
 
     def choiceSbuttonLC(self):

@@ -4,37 +4,98 @@ import json
 from collections import defaultdict
 import time
 import server_data_handler
-
+import struct
 
 class GameServer:
     def __init__(self):
-        self.sessions = defaultdict(dict)  # Każda sesja to klucz sesji z listą graczy i stanem gry
-        self.nextSessionID = 1           # ID do śledzenia unikalnych sesji
+        self.sessions = defaultdict(dict)  # Każda sesja przechowuje graczy i stan gry
+        self.nextSessionID = 1             # ID do śledzenia unikalnych sesji
         self.lock = threading.Lock()       # Lock do synchronizacji dostępu do sesji
         self.messageFromClient = server_data_handler.MessageFromClient()
+   
+  
+    def _sendJson(self, clientSocket, data):
+        if not isinstance(data, dict):
+            return
+        json_string = json.dumps(data)  
+        request_bytes = json_string.encode('utf-8')  
+        request_length = len(request_bytes)
+        clientSocket.sendall(struct.pack('!I', request_length))
+        clientSocket.sendall(request_bytes)
 
 
-    def sendJson(sock, data, chunk_size=1024):
-        json_data = json.dumps(data, ensure_ascii=False)
-        total_length = len(json_data)
-        
-        sock.sendall(f"{total_length}\n".encode('utf-8'))
+    def clientHandler(self, clientSocket):
+        try:
+            while True:
+                length_data = b""
+                while len(length_data) < 4:
+                    packet = clientSocket.recv(4 - len(length_data))
+                    if not packet:
+                        return
+                    length_data += packet
 
-        for i in range(0, total_length, chunk_size):
-            chunk = json_data[i:i + chunk_size] 
-            sock.sendall(chunk.encode('utf-8'))
+                response_length = struct.unpack('!I', length_data)[0]
+                received_data = b""
+                while len(received_data) < response_length:
+                    packet = clientSocket.recv(min(4096, response_length - len(received_data)))
+                    if not packet:
+                        raise ConnectionError("Połączenie zerwane w trakcie odbierania danych.")
+                    received_data += packet
 
-     
-    def removePlayerFromSession(self, clientSocket):
-        with self.lock:
-            for sessionID, sessionData in list(self.sessions.items()):
-                for player in sessionData['players']:
-                    if player.socket == clientSocket:
-                        sessionData['players'].remove(player)
-                        print(f"Gracz {player.login} został usunięty z sesji {sessionID}")
-                   
+                data = json.loads(received_data.decode())
+                self.handleAction(clientSocket, data)
 
-    def graczeLastPing(self):
+        except Exception as e:
+            print(f"Błąd odbioru danych: {e}")
+            
+
+    def handleAction(self, clientSocket, data):
+        action = data.get('action')     
+        match action:
+            case 'create_game':
+                with self.lock:
+                    sessionID = self.nextSessionID
+                    player_, board_ = self.messageFromClient.create_game(clientSocket, data)
+                    self.sessions[sessionID] = {'players': [player_], 'plansza': board_}
+                    self.nextSessionID += 1
+                    print(f"Sesja {sessionID} utworzona przez {player_.login}.")
+                    sessions = self.messageFromClient.openSessionsGame(self.sessions)
+                    self._sendJson(clientSocket, {'action': 'game_created', 'sessionID': sessionID, 'sessions': sessions})        
+            case 'list_sessions':
+                with self.lock:
+                    sessions = self.messageFromClient.openSessionsGame(self.sessions)
+                    self._sendJson(clientSocket, {'action': 'list_sessions', 'sessions': sessions})         
+            case 'join_game':
+                with self.lock:
+                    sessionID = data.get('sessionID')
+                    if sessionID not in self.sessions:
+                        self._sendJson(clientSocket, {'action': 'joined_game', 'error': 'Session not found'})
+                    elif self.messageFromClient.isFull(self.sessions, sessionID):
+                        self._sendJson(clientSocket, {'action': 'joined_game', 'error': 'Session is full'})
+                    else:
+                        player_ = self.messageFromClient.prepareSecondPlayer(clientSocket, data, self.sessions)
+                        self.sessions[sessionID]['players'].append(player_)
+                        print(f"Gracz {player_.login} dołączył do sesji {sessionID}.")
+                        self._sendJson(clientSocket, {'action': 'joined_game', 'sessionID': sessionID})       
+                        parcel = self.messageFromClient.startGame(self.sessions[sessionID]['players'], 
+                                                                  self.sessions[sessionID]['plansza'])
+                        for player in self.sessions[sessionID]['players']:
+                            self._sendJson(player.socket, {'action': 'start_game', 'data': parcel})      
+            case 'ping':
+                with self.lock:
+                    sessionID = data.get('sessionID')
+                    if sessionID != None:
+                        try:
+                            for player in self.sessions[sessionID]['players']:
+                                if player.socket == clientSocket:
+                                    player.lastPingTime = time.time() 
+                        except:
+                            print(f"Brak sesji {sessionID}")         
+            case _:
+                print(f"Nieznana akcja: {action}")
+                    
+
+    def playerLastPing(self):
         while True:
             with self.lock:
                 for sessionID, sessionData in list(self.sessions.items()):
@@ -46,102 +107,21 @@ class GameServer:
                     if len(sessionData['players']) == 0:
                         del self.sessions[sessionID]
                         print(f"Sesja {sessionID} została automatycznie usunięta (brak graczy).")
-
             time.sleep(5)
 
-    
-    def clientHandler(self, clientSocket):
-        try:
-            while True:
-                
-                message = clientSocket.recv(1024).decode()
-                if not message:
-                    break
-                data = json.loads(message)
-
-                if data['action'] == 'create_game':
-                    with self.lock:
-                        sessionID = self.nextSessionID
-                        player_, board_ = self.messageFromClient.create_game(clientSocket, data)
-                        self.sessions[sessionID] = {'players':[player_], 'plansza': board_}
-                        self.nextSessionID += 1           
-                        print(f"Nowa sesja gry {sessionID} została utworzona przez {player_.login} jako {player_.name}")
-                        response = json.dumps({'action': 'game_created', 'sessionID': sessionID})
-                        clientSocket.sendall(response.encode())
-      
-                elif data['action'] == 'list_sessions':
-                    with self.lock:
-                        sessions = self.messageFromClient.openSessionsGame(self.sessions)
-                        response = json.dumps({'action': 'list_sessions', 'sessions': sessions})
-                        clientSocket.sendall(response.encode())
-
-                elif data['action'] == 'join_game':
-                    with self.lock:
-                        sessionID = data.get('sessionID')
-                        if sessionID not in self.sessions:
-                            response = json.dumps({'action': 'joined_game', 'error': 'Session not found'})
-                        else:
-                            if self.messageFromClient.isFull(self.sessions, sessionID):
-                                response = json.dumps({'action': 'joined_game', 'error': 'Session is full'})
-                            else:
-                                player_ = self.messageFromClient.prepareSecondPlayer(clientSocket, data, self.sessions)
-                                self.sessions[sessionID]['players'].append(player_) 
-                                print(f"Gracz {player_.login} dołączył do gry jako {player_.name}.")
-                       # else:
-                       #         print(f"Błąd: {player_['data']}")
-                                response = json.dumps({'action': 'joined_game', 'sessionID': sessionID})
-                                clientSocket.sendall(response.encode())
-
-                             #   if len(self.sessions[sessionID]['players']) == 2:
-                                parcel = self.messageFromClient.startGame(self.sessions[sessionID]['players'], self.sessions[sessionID]['plansza'])
-                                response = json.dumps({'action': 'start_game', 'data': parcel}, ensure_ascii=False)
-                                total_length = len(response)
-
-                               # response = response.encode()
-                               # data2 = json.loads(response.decode())
-                                #data = json.loads(response)
-                              #  print(json.dumps(data2, indent=4))
-                                clientSocket.sendall(response.encode())
-
-                               # for player in self.sessions[sessionID]['players']:
-                               #     player.socket.sendall(response.encode())
-                                   
-                                   
-
-                elif data['action'] == 'ping':
-                    with self.lock:
-                        for sessionID, sessionData in self.sessions.items():
-                            for player in sessionData['players']:
-                                if player.socket == clientSocket:
-                                    player.lastPingTime = time.time()
-                                    break
-
-        except ConnectionResetError:
-            print("Klient się rozłączył")
-            self.removePlayerFromSession(clientSocket)
-        finally:
-            clientSocket.close()
-            
-          
 
 def startServer():
     gameServer = GameServer()
-   
-    # Konfiguracja serwera TCP
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serverSocket.bind(('0.0.0.0', 25565))
-    serverSocket.listen(100)  # Maksymalnie 100 oczekujących połączeń
+    serverSocket.listen(100)
     print("Serwer oczekuje na połączenia...")
-    threading.Thread(target=gameServer.graczeLastPing, daemon=True).start()
-
+    threading.Thread(target=gameServer.playerLastPing, daemon=True).start()
 
     while True:
         clientSocket, addr = serverSocket.accept()
         print(f"Połączono z {addr}")
-
-        # Uruchamiamy nowy wątek dla każdego klienta
         threading.Thread(target=gameServer.clientHandler, args=(clientSocket,)).start()
 
-# Uruchomienie serwera
 if __name__ == "__main__":
     startServer()

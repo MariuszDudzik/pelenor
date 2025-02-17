@@ -1,7 +1,10 @@
+import pawn
+
 class Field(object):
 
-    def __init__(self, QRSList, coulor, rimColourList, rimThicknessList, 
-                 movementList, TerrainSign, movementPointToSpend, defencePoint):
+    def __init__(self, QRSList = None, coulor = None, rimColourList = None, 
+                 rimThicknessList = None, movementList = None, TerrainSign = None, 
+                 movementPointToSpend = None, defencePoint = None):
         self.pawnList = []
         self.QRSList = QRSList
         self.coulor = coulor
@@ -14,7 +17,7 @@ class Field(object):
 
     def to_dict(self):
         field_dict = {
-            'pawnList': self.pawnList,
+            'pawnList': [unit.to_dict() for unit in self.pawnList],
             'QRSList': self.QRSList,
             'coulor': self.coulor,
             'rimColourList': self.rimColourList,
@@ -28,6 +31,7 @@ class Field(object):
     
     def from_dict(self, data):
         self.pawnList = data.get('pawnList', [])
+        self.pawnList = [pawn.Pawn().from_dict(unit_data) for unit_data in data.get('pawnList', [])]
         self.QRSList = data.get('QRSList')
         self.coulor = data.get('coulor')
         self.rimColourList = data.get('rimColourList')
