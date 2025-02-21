@@ -22,7 +22,6 @@ class ControlObj(object):
         self.active = True
         
 
-
     def draw(self, screen):
         pygame.draw.rect(screen, self.colour, (self.positionX, self.positionY, 
                                                self.width, self.height))
@@ -85,13 +84,11 @@ class ControlObj(object):
                     self.onScroll5()
                     
 
-
 class Label(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
                  fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
-
 
 
 class LabelWithScroll(Label):

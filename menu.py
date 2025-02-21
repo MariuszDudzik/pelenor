@@ -12,8 +12,7 @@ class Menu(object):
         self.connection = connection
         self.scroll_offset = 0  
         self.selectedIdx = -1
-
-         
+                 
         self.choiceSbutton = control_obj.Button(screenWidth / 2 - screenWidth * 0.14, 
             screenHeight / 3 - screenHeight * 0.09, screenWidth * 0.14, screenHeight * 0.065, 
             kolor.DGREY, "Sauron", None, int(screenHeight * 0.045), kolor.WHITE, 

@@ -48,6 +48,6 @@ class MessageFromServer(object):
         player_date = data['data']['board']
         self.game.board.from_dict(player_date)
         print("Gra rozpoczęta")
-      #  self.gameController.setInGame(True)
+        self.gameController.setInGame(True)
 
 

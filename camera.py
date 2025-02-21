@@ -1,4 +1,4 @@
-class Camera():
+class Camera(object):
 
     def __init__(self):
         self.camera_x = 0
