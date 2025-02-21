@@ -1,5 +1,5 @@
-przyciemnienie = 0.80
-rozjasnienie = 1.20
+dark = 0.80
+light = 1.20
 
 # Kolory
 BLACK = (0, 0, 0)
@@ -21,16 +21,16 @@ LIME = (50, 205, 50)
 #LIME = (127, 225, 0)
 REDJ = (225, 0, 0)
 
-PGREEN = (GREEN[0] * przyciemnienie, GREEN[1] * przyciemnienie, GREEN[2] * przyciemnienie)
-PYELLOW = (YELLOW[0] * przyciemnienie, YELLOW[1] * przyciemnienie, YELLOW[2] * przyciemnienie)
-PBROWN = (BROWN[0] * przyciemnienie, BROWN[1] * przyciemnienie, BROWN[2] * przyciemnienie)
-PBEIGE = (BEIGE[0] * przyciemnienie, BEIGE[1] * przyciemnienie, BEIGE[2] * przyciemnienie)
-PGREY = (GREY[0] * przyciemnienie, GREY[1] * przyciemnienie, GREY[2] * przyciemnienie)
-PDGREY = (DGREY[0] * przyciemnienie, DGREY[1] * przyciemnienie, DGREY[2] * przyciemnienie)
-PPERU = (PERU[0] * przyciemnienie, PERU[1] * przyciemnienie, PERU[2] * przyciemnienie)
-PDARKKHAKI = (DARKKHAKI[0] * przyciemnienie, DARKKHAKI[1] * przyciemnienie, DARKKHAKI[2] * przyciemnienie)
+PGREEN = (GREEN[0] * dark, GREEN[1] * dark, GREEN[2] * dark)
+PYELLOW = (YELLOW[0] * dark, YELLOW[1] * dark, YELLOW[2] * dark)
+PBROWN = (BROWN[0] * dark, BROWN[1] * dark, BROWN[2] * dark)
+PBEIGE = (BEIGE[0] * dark, BEIGE[1] * dark, BEIGE[2] * dark)
+PGREY = (GREY[0] * dark, GREY[1] * dark, GREY[2] * dark)
+PDGREY = (DGREY[0] * dark, DGREY[1] * dark, DGREY[2] * dark)
+PPERU = (PERU[0] * dark, PERU[1] * dark, PERU[2] * dark)
+PDARKKHAKI = (DARKKHAKI[0] * dark, DARKKHAKI[1] * dark, DARKKHAKI[2] * dark)
 
-RGREY = (GREY[0] * rozjasnienie, GREY[1] * rozjasnienie, GREY[2] * rozjasnienie)
-# RREDJ = (255, REDJ[1] * rozjasnienie * 2, REDJ[2] * rozjasnienie * 2)
+RGREY = (GREY[0] * light, GREY[1] * light, GREY[2] * light)
+# RREDJ = (255, REDJ[1] * light * 2, REDJ[2] * light * 2)
 RREDJ = (255, 69, 0)
 RLIME = (127, 255, 0)
