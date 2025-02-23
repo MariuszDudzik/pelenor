@@ -70,4 +70,19 @@ class Player(object):
       def shuffle(self):
         random.shuffle(self.units)
 
+      def getLogin(self):
+        return self.login
+      
+      def getDemoralizationTreshold1(self):
+        return self.demoralizationTreshold1
+      
+      def getDemoralizationTreshold2(self):
+        return self.demoralizationTreshold2
+      
+      def getDemoralizationTreshold3(self):
+        return self.demoralizationTreshold3
+      
+      def getSpellPower(self):
+        return self.spellPower
+
         

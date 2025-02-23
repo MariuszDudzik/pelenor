@@ -1,3 +1,4 @@
+import platform
 
 class GameController(object):
     def __init__(self):
@@ -7,8 +8,20 @@ class GameController(object):
         self.choosedSite = None
         self.choosedLogin = None
         self.openSessions = []
-       
-           
+        self.system = platform.system()
+        self.defaultFont = None
+        
+        self._setDefaultFont()
+
+
+    def _setDefaultFont(self):
+        if self.system == 'Windows':
+            self.defaultFont = 'Arial'
+        elif self.system == 'Linux':
+            self.defaultFont = 'Liberation Sans'
+        else:
+            self.defaultFont = 'None'
+  
     def getSite(self):
         return self.choosedSite
     
@@ -49,3 +62,6 @@ class GameController(object):
 
     def getCountOpenSessions(self):
         return len(self.openSessions)
+    
+    def getDefaultFont(self):
+        return self.defaultFont

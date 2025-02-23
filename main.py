@@ -14,7 +14,7 @@ def main():
     gameController_ = gamecontroller.GameController()
     connection_ = client.Client(gameController_, game_)
     menu_ = menu.Menu(screen_.get_width(), screen_.get_height(), gameController_, connection_)
-    play_ = play.Play(screen_.get_width(), screen_.get_height(), gameController_, connection_)
+    play_ = play.Play(screen_.get_width(), screen_.get_height(), gameController_, connection_, game_)
     
     try:
         connection_.startConnection()
@@ -41,6 +41,16 @@ def main():
                     connection_.setAction(None)
                     
             else:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        connection_.close_connection()
+                        pygame.quit()
+                        quit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            connection_.close_connection()
+                            pygame.quit()
+                            quit()
                 screen_.get_screen().fill((0, 0, 0))
                 play_.drawPlay(screen_.get_screen())
 

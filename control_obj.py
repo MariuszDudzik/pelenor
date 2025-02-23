@@ -25,11 +25,11 @@ class ControlObj(object):
     def draw(self, screen):
         pygame.draw.rect(screen, self.colour, (self.positionX, self.positionY, 
                                                self.width, self.height))
-        font = pygame.font.Font(self.fontStyle, self.fontSize)
+        font = pygame.font.SysFont(self.fontStyle, self.fontSize)
         label = font.render(self.text, True, self.fontColour)
         screen.blit(label, (self.positionX + (self.width - label.get_width()) // 2, 
                             self.positionY + (self.height - label.get_height()) // 2))
-
+        
 
     def isOverObject(self, mousePosition):
         return self.rect.collidepoint(mousePosition)
@@ -133,4 +133,27 @@ class Button(ControlObj):
                  fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+        
+        
+class StageGraph(ControlObj):
+    def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
+                 season, nrStage):
+        super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+        self.season = season
+        self.nrStage = nrStage
+
+
+class PhazeGraph(ControlObj):
+    def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
+                 nrstage, nrphaze):
+        super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+        self.nrStage = nrstage
+        self.nrPhaze = nrphaze
+        
+        
+
         
