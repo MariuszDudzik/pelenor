@@ -1,5 +1,6 @@
 import control_obj
 import kolor
+import pygame
 
 class Play(object):
 
@@ -72,6 +73,13 @@ class Play(object):
 
 
     def drawStagePhaze(self, screen):
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+        myouseUponPhaze = False
+        max_line_width = screen_width * 0.1
+        mousePos = pygame.mouse.get_pos()
+        positionX = screen_width - self.stateField.getWidth() - max_line_width - 10
+        positionY = mousePos[1] - 10
         stages = self.game.getStagesList()
         phazes = self.game.getPhazesList()
         width = self.stateField.getWidth()
@@ -80,21 +88,37 @@ class Play(object):
         stageheight = int(height / 24)
         phazewidth = (width - 6)// 9
         phazeheight = conStageHeight * 0.96 // 2
-        l = 0
+    
         for stage in stages:
             stageField = control_obj.StageGraph(self.stateField.getPositionX() + 3, stageheight, 
                     width - 6, conStageHeight, stage.getColour(), "", None, int(height * 0.035), 
-                    kolor.WHITE, None, None, None, None, stage.getSeason(),
-                    stage.getText())
+                    kolor.WHITE, None, None, None, None, stage.getSeason(), stage.getText())
             stageField.draw(screen)
-            stageheight += conStageHeight + 2 
-            for i in range(1, 9):
-                phazeField = control_obj.PhazeGraph(1.8 + stageField.getPositionX() + 
-                        (phazewidth + 2.0) * (i - 1), stageField.getPositionY() + stageField.getHeight() * 0.08, phazewidth, phazeheight, phazes[l].getColour(), "", None, int(height * 0.035), 
-                        kolor.BLACK, None, None, None, None, phazes[l].getNrStage(), phazes[l].getName())
-                phazeField.draw(screen)
-                l += 1
+            stageheight += conStageHeight + 2
 
-          
-        
-        
+            if not myouseUponPhaze:
+                if stageField.isOverObject(mousePos):
+                    
+                    text = f"ETAP {stage.getNrStage()}: {stage.getSeason()} \n {stage.getText()}"
+                    control_obj.Description.draw(screen, text, max_line_width, positionX, positionY, 
+                            self.gameController.getDefaultFont(), int(screen_height * 0.015))    
+
+        stageheight = int(height / 24)
+        i = 0
+        for phaze in phazes:
+            i+=1
+            phazeField = control_obj.PhazeGraph(4.8 + self.stateField.getPositionX() + 
+                    (phazewidth + 2.0) * (i - 1), stageheight + conStageHeight * 0.08, phazewidth, 
+                    phazeheight, phaze.getColour(), "", None, int(height * 0.035), kolor.BLACK, None, 
+                    None, None, None, phaze.getNrStage(), phaze.getName())
+            phazeField.draw(screen)
+            if i % 8 == 0:
+                i = 0
+                stageheight += conStageHeight + 2
+
+            if phazeField.isOverObject(mousePos):  
+                text = f"Faza {phaze.getNrPhaze()}: {phaze.getName()}"
+                control_obj.Description.draw(screen, text, max_line_width, positionX, positionY, 
+                            self.gameController.getDefaultFont(), int(screen_height * 0.015))  
+
+                myouseUponPhaze = True

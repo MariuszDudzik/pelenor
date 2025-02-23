@@ -1,5 +1,6 @@
 import pygame
 import kolor
+import support
 
 class ControlObj(object):
     def __init__(self, positionX, positionY, width, height, colour, text, 
@@ -66,7 +67,9 @@ class ControlObj(object):
     
     def getFontSize(self):
         return self.fontSize
-
+    
+    def getFontStyle(self): 
+        return self.fontStyle
 
     def handle_event(self, mousePosition, event):
         if self.isOverObject(mousePosition):
@@ -153,6 +156,28 @@ class PhazeGraph(ControlObj):
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
         self.nrStage = nrstage
         self.nrPhaze = nrphaze
+
+
+class Description(object):
+
+    @staticmethod
+    def draw(screen, text, max_line_width, positionX, positionY, fontStyle, fontSize):
+        font = pygame.font.SysFont(fontStyle, fontSize)
+        line = support.Wrap.wrap_text(text, font, max_line_width)
+        width = max_line_width + 10
+        height = len(line) * (font.get_height() + 5) + 10
+        rect = pygame.Rect(positionX, positionY, width, height)
+        menu_surface = pygame.Surface((width, height))
+        menu_surface.fill((kolor.WHITE))
+        for i, row in enumerate(line):
+            tekst_surface = font.render(row, True, kolor.BLACK)
+            menu_surface.blit(tekst_surface, (5, 5 + i * (font.get_height() + 5)))
+        screen.blit(menu_surface, (positionX, positionY))
+
+
+
+
+
         
         
 

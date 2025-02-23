@@ -16,6 +16,9 @@ class Stage(object):
 
     def getText(self):
         return self.text
+    
+    def getNrStage(self):
+        return self.nrStage
 
 
 def createStage():
