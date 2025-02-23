@@ -22,4 +22,6 @@ class Board(object):
         hexes_data = data.get('hexes', {})
         self.hexes = {key: field.Field().from_dict(hex_data) for key, hex_data in hexes_data.items()}
         return self
-
+    
+    def getHexes(self):
+        return self.hexes

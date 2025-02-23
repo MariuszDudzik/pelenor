@@ -1,6 +1,8 @@
 import control_obj
 import kolor
 import pygame
+import hexagon
+import camera
 
 class Play(object):
 
@@ -9,6 +11,8 @@ class Play(object):
         self.gameController = gameController
         self.connection = connection
         self.game = game
+        self.camera = camera.Camera()
+        self.hex_size = screenHeight * 0.024
 
         self.playerWfield = control_obj.Label(0, 0, screenWidth * 0.1, screenHeight // 2,
             kolor.GREEN, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
@@ -53,7 +57,8 @@ class Play(object):
         self.map = control_obj.Label(screenWidth * 0.1, 0, screenWidth + screenWidth * 0.366, 
             screenHeight + screenHeight * 0.462, kolor.ORANGE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         
-
+    def getHexSize(self):
+        return self.hex_size
 
     def drawPlay(self, screen):
         self.playerWfield.draw(screen)
@@ -68,9 +73,18 @@ class Play(object):
         self.playerSdemoralization.draw(screen)
         self.playerSspellPower.draw(screen)
         self.map.draw(screen)
+        self.drawHexes(screen)
         self.stateField.draw(screen)
         self.drawStagePhaze(screen)
 
+
+    def drawHexes(self, screen):
+        temp_surface = pygame.Surface((self.map.getWidth(), self.map.getHeight()))
+        temp_surface.fill((kolor.ORANGE))
+        hexagon.Hexagon.draw_map(temp_surface, self.getHexSize() * self.camera.getCameraScale(), 
+                -self.camera.getCameraX() * self.camera.getCameraScale(), -self.camera.getCameraY()
+                * self.camera.getCameraScale(), self.game.board.getHexes())
+        screen.blit(temp_surface, (self.map.getPositionX(), self.map.getPositionY()))
 
     def drawStagePhaze(self, screen):
         screen_width = screen.get_width()

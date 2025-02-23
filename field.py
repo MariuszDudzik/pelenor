@@ -15,6 +15,15 @@ class Field(object):
         self.movementPointToSpend =movementPointToSpend
         self.defencePoint = defencePoint
 
+    def getRimColourList(self):
+        return self.rimColourList
+    
+    def getRimThicknessList(self):
+        return self.rimThicknessList
+    
+    def getColour(self):
+        return self.coulor
+    
     def to_dict(self):
         field_dict = {
             'pawnList': [unit.to_dict() for unit in self.pawnList],
