@@ -56,6 +56,13 @@ class Play(object):
             kolor.BLUE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         self.map = control_obj.Label(screenWidth * 0.1, 0, screenWidth + screenWidth * 0.366, 
             screenHeight + screenHeight * 0.462, kolor.ORANGE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
+        self.zoomInButton = control_obj.Button(self.stateField.getPositionX() + (screenHeight * 0.0028), 
+            screenHeight * 0.0028, screenHeight * 0.028, screenHeight * 0.028, kolor.GREY, "+", 
+            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, None, None, None, None)
+        self.zoomOutButton = control_obj.Button(self.stateField.getPositionX() + (screenHeight * 0.033),
+            screenHeight * 0.0028, screenHeight * 0.028, screenHeight * 0.028, kolor.GREY, "-", 
+            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, None, None, None, None)
+
         
     def getHexSize(self):
         return self.hex_size
@@ -75,6 +82,7 @@ class Play(object):
         self.map.draw(screen)
         self.drawHexes(screen)
         self.stateField.draw(screen)
+        self.drawZoomButtons(screen)
         self.drawStagePhaze(screen)
 
 
@@ -140,4 +148,16 @@ class Play(object):
                             self.gameController.getDefaultFont(), int(screen_height * 0.015))
                 return
 
-               
+    def drawZoomButtons(self, screen):
+        mousePos = pygame.mouse.get_pos()
+        if self.zoomInButton.isOverObject(mousePos):
+            self.zoomInButton.setColour(kolor.RGREY)
+        else:
+            self.zoomInButton.setColour(kolor.GREY)
+        if self.zoomOutButton.isOverObject(mousePos):
+            self.zoomOutButton.setColour(kolor.RGREY)
+        else:
+            self.zoomOutButton.setColour(kolor.GREY)
+        self.zoomInButton.draw(screen)
+        self.zoomOutButton.draw(screen)
+   

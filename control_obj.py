@@ -70,6 +70,9 @@ class ControlObj(object):
     
     def getFontStyle(self): 
         return self.fontStyle
+    
+    def setColour(self, colour):
+        self.colour = colour
 
     def handle_event(self, mousePosition, event):
         if self.isOverObject(mousePosition):
