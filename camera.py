@@ -24,3 +24,9 @@ class Camera(object):
     
     def getCameraScale(self):
         return self.scale
+    
+    def getCameraSpeed(self):
+        return self.camera_speed
+    
+    def getZoomSpeed(self):
+        return self.zoom_speed

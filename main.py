@@ -46,11 +46,12 @@ def main():
                         connection_.close_connection()
                         pygame.quit()
                         quit()
+                    elif event.type == pygame.MOUSEBUTTONDOWN:   
+                        play_.handleEvent(mousePosition, event)
                     elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            connection_.close_connection()
-                            pygame.quit()
-                            quit()
+                        play_.handleKeyboardEvent(event)
+            
+                play_.updateMovement(screen_.get_width(), screen_.get_height())
                 screen_.get_screen().fill((0, 0, 0))
                 play_.drawPlay(screen_.get_screen())
 

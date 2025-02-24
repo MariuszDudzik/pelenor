@@ -3,6 +3,8 @@ import kolor
 import pygame
 import hexagon
 import camera
+import play_handler
+from functools import partial # Powoduje, że funkcja x() jest wywoływana bez argumentów
 
 class Play(object):
 
@@ -58,12 +60,21 @@ class Play(object):
             screenHeight + screenHeight * 0.462, kolor.ORANGE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         self.zoomInButton = control_obj.Button(self.stateField.getPositionX() + (screenHeight * 0.0028), 
             screenHeight * 0.0028, screenHeight * 0.028, screenHeight * 0.028, kolor.GREY, "+", 
-            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, None, None, None, None)
+            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
+            partial(play_handler.ZoomInHandler.handle, self.getCamera()), None, None, None)
         self.zoomOutButton = control_obj.Button(self.stateField.getPositionX() + (screenHeight * 0.033),
             screenHeight * 0.0028, screenHeight * 0.028, screenHeight * 0.028, kolor.GREY, "-", 
-            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, None, None, None, None)
-
+            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
+            partial(play_handler.ZoomOutHandler.handle, self.getCamera()), None, None, None)
         
+
+    def _setMaxCamera(self, screenWidth, screenHeight):
+        self.camera.setCameraX(max(0, min(self.camera.getCameraX(), self.map.getWidth() - screenWidth)))
+        self.camera.setCameraY(max(0, min(self.camera.getCameraY(), self.map.getHeight() - screenHeight)))
+
+    def getCamera(self):
+        return self.camera
+
     def getHexSize(self):
         return self.hex_size
 
@@ -95,12 +106,12 @@ class Play(object):
         screen.blit(temp_surface, (self.map.getPositionX(), self.map.getPositionY()))
 
     def drawStagePhaze(self, screen):
+        mousePosition = pygame.mouse.get_pos()
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         max_line_width = screen_width * 0.1
-        mousePos = pygame.mouse.get_pos()
         positionX = screen_width - self.stateField.getWidth() - max_line_width - 10
-        positionY = mousePos[1] - 10
+        positionY = mousePosition[1] - 10
         stages = self.game.getStagesList()
         phazes = self.game.getPhazesList()
         width = self.stateField.getWidth()
@@ -135,29 +146,57 @@ class Play(object):
                 stageheight += conStageHeight + 2
 
         for phaze, phazeField in zip(phazes, phazeFields):
-            if phazeField.isOverObject(mousePos):  
+            if phazeField.isOverObject(mousePosition):  
                 text = f"Faza {phaze.getNrPhaze()}: {phaze.getName()}"
                 control_obj.Description.draw(screen, text, max_line_width, positionX, positionY, 
                             self.gameController.getDefaultFont(), int(screen_height * 0.015))
                 return
 
         for stage, stageField in zip(stages, stageFields):
-            if stageField.isOverObject(mousePos):
+            if stageField.isOverObject(mousePosition):
                 text = f"ETAP {stage.getNrStage()}: {stage.getSeason()} \n {stage.getText()}"
                 control_obj.Description.draw(screen, text, max_line_width, positionX, positionY, 
                             self.gameController.getDefaultFont(), int(screen_height * 0.015))
                 return
 
     def drawZoomButtons(self, screen):
-        mousePos = pygame.mouse.get_pos()
-        if self.zoomInButton.isOverObject(mousePos):
+        mousePosition = pygame.mouse.get_pos()
+        if self.zoomInButton.isOverObject(mousePosition):
             self.zoomInButton.setColour(kolor.RGREY)
         else:
             self.zoomInButton.setColour(kolor.GREY)
-        if self.zoomOutButton.isOverObject(mousePos):
+        if self.zoomOutButton.isOverObject(mousePosition):
             self.zoomOutButton.setColour(kolor.RGREY)
         else:
             self.zoomOutButton.setColour(kolor.GREY)
         self.zoomInButton.draw(screen)
         self.zoomOutButton.draw(screen)
-   
+
+
+    def handleEvent(self, mousePosition, event):
+        self.zoomInButton.handle_event(mousePosition, event)
+        self.zoomOutButton.handle_event(mousePosition, event)
+
+
+    def handleKeyboardEvent(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.connection.close_connection()
+                pygame.quit()
+                quit()
+
+
+    def updateMovement(self, screenWidth, screenHeight):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.camera.setCameraX(self.camera.getCameraX() - self.camera.getCameraSpeed())
+        if keys[pygame.K_RIGHT]:
+            self.camera.setCameraX(self.camera.getCameraX() + self.camera.getCameraSpeed())
+        if keys[pygame.K_UP]:
+            self.camera.setCameraY(self.camera.getCameraY() - self.camera.getCameraSpeed())
+        if keys[pygame.K_DOWN]:
+            self.camera.setCameraY(self.camera.getCameraY() + self.camera.getCameraSpeed())
+
+        self._setMaxCamera(screenWidth, screenHeight)
+
+    
