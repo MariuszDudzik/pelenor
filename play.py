@@ -37,7 +37,9 @@ class Play(object):
             int(self.playerWfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None)
         self.playerWspellPower = control_obj.Label(self.playerWphoto.getWidth() + 6, 
             self.playerWlogin.getHeight() + self.playerWdemoralization1.getHeight() + 9, 
-            int((self.playerWphoto.getWidth() - 3) / 2), int((self.playerWphoto.getHeight() - 3) / 2), kolor.WHITE, str(self.game.playerW.getSpellPower()), self.gameController.getDefaultFont(), int(self.playerWfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None) 
+            int((self.playerWphoto.getWidth() - 3) / 2), int((self.playerWphoto.getHeight() - 3) / 2), kolor.WHITE, 
+            str(self.game.playerW.getSpellPower()), self.gameController.getDefaultFont(), 
+            int(self.playerWfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None) 
         self.playerSfield = control_obj.Label(0, self.playerWfield.getHeight(), screenWidth * 0.1, 
             screenHeight // 2, kolor.RED, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         self.playerSlogin = control_obj.Label(3, self.playerSfield.getHeight() + 3, 
@@ -53,11 +55,16 @@ class Play(object):
             str(self.game.playerS.getDemoralizationTreshold1()), self.gameController.getDefaultFont(), 
             int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None)
         self.playerSspellPower = control_obj.Label(self.playerSphoto.getWidth() + 6, 
-            self.playerSlogin.getHeight() + self.playerSdemoralization.getHeight() + 9 + self.playerSfield.getHeight(), int((self.playerSphoto.getWidth() - 3) / 2), int((self.playerSphoto.getHeight() - 3) / 2), kolor.WHITE, str(self.game.playerS.getSpellPower()), self.gameController.getDefaultFont(), int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None) 
+            self.playerSlogin.getHeight() + self.playerSdemoralization.getHeight() + 9 + self.playerSfield.getHeight(), 
+            int((self.playerSphoto.getWidth() - 3) / 2), int((self.playerSphoto.getHeight() - 3) / 2), kolor.WHITE, 
+            str(self.game.playerS.getSpellPower()), self.gameController.getDefaultFont(), 
+            int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None) 
         self.stateField = control_obj.Label(screenWidth - screenWidth * 0.1, 0, screenWidth * 0.101, screenHeight,
             kolor.BLUE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         self.map = control_obj.Label(screenWidth * 0.1, 0, screenWidth + screenWidth * 0.366, 
-            screenHeight + screenHeight * 0.462, kolor.ORANGE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
+            screenHeight + screenHeight * 0.462, kolor.ORANGE, "", None, int(screenHeight * 0.035), kolor.WHITE, 
+            None, None, partial(play_handler.ZoomOutHandler.handle, self.getCamera()), 
+            partial(play_handler.ZoomInHandler.handle, self.getCamera()))
         self.zoomInButton = control_obj.Button(self.stateField.getPositionX() + (screenHeight * 0.0028), 
             screenHeight * 0.0028, screenHeight * 0.028, screenHeight * 0.028, kolor.GREY, "+", 
             self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
@@ -78,7 +85,7 @@ class Play(object):
     def getHexSize(self):
         return self.hex_size
 
-    def drawPlay(self, screen):
+    def drawPlay(self, screen, mousePosition):
         self.playerWfield.draw(screen)
         self.playerSfield.draw(screen)
         self.playerWlogin.draw(screen)
@@ -93,8 +100,8 @@ class Play(object):
         self.map.draw(screen)
         self.drawHexes(screen)
         self.stateField.draw(screen)
-        self.drawZoomButtons(screen)
-        self.drawStagePhaze(screen)
+        self.drawZoomButtons(screen, mousePosition)
+        self.drawStagePhaze(screen, mousePosition)
 
 
     def drawHexes(self, screen):
@@ -105,8 +112,7 @@ class Play(object):
                 * self.camera.getCameraScale(), self.game.board.getHexes())
         screen.blit(temp_surface, (self.map.getPositionX(), self.map.getPositionY()))
 
-    def drawStagePhaze(self, screen):
-        mousePosition = pygame.mouse.get_pos()
+    def drawStagePhaze(self, screen, mousePosition):
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         max_line_width = screen_width * 0.1
@@ -159,8 +165,7 @@ class Play(object):
                             self.gameController.getDefaultFont(), int(screen_height * 0.015))
                 return
 
-    def drawZoomButtons(self, screen):
-        mousePosition = pygame.mouse.get_pos()
+    def drawZoomButtons(self, screen, mousePosition):
         if self.zoomInButton.isOverObject(mousePosition):
             self.zoomInButton.setColour(kolor.RGREY)
         else:
@@ -176,18 +181,17 @@ class Play(object):
     def handleEvent(self, mousePosition, event):
         self.zoomInButton.handle_event(mousePosition, event)
         self.zoomOutButton.handle_event(mousePosition, event)
+        self.map.handle_event(mousePosition, event)
 
 
     def handleKeyboardEvent(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                self.connection.close_connection()
-                pygame.quit()
-                quit()
+        if event.key == pygame.K_ESCAPE:
+            self.connection.close_connection()
+            pygame.quit()
+            quit()
 
 
-    def updateMovement(self, screenWidth, screenHeight):
-        keys = pygame.key.get_pressed()
+    def updateMovement(self, screenWidth, screenHeight, keys):
         if keys[pygame.K_LEFT]:
             self.camera.setCameraX(self.camera.getCameraX() - self.camera.getCameraSpeed())
         if keys[pygame.K_RIGHT]:

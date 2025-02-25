@@ -48,6 +48,7 @@ class Hexagon(object):
                     outline_colors.append(kolor.CHOCOLATE)
         return outline_colors
 
+    @staticmethod
     def side_thickness(QRS_key, hex):
         thickness = []
         obj = hex.get(QRS_key)

@@ -3,7 +3,7 @@ class Camera(object):
     def __init__(self):
         self.camera_x = 0
         self.camera_y = 0
-        self.camera_speed = 20
+        self.camera_speed = 30
         self.scale = 1.0
         self.zoom_speed = 0.07
 

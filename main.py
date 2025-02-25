@@ -21,6 +21,7 @@ def main():
 
         while True:
             mousePosition = pygame.mouse.get_pos()
+            key = pygame.key.get_pressed()
             if gameController_.getInGame():
                 menu_.stateLabel.changeText(connection_.getConnectionStatus())
                 menu_.countSessionLabel.changeText(f"Liczba sesji: {gameController_.getCountOpenSessions()}")
@@ -51,12 +52,12 @@ def main():
                     elif event.type == pygame.KEYDOWN:
                         play_.handleKeyboardEvent(event)
             
-                play_.updateMovement(screen_.get_width(), screen_.get_height())
+                play_.updateMovement(screen_.get_width(), screen_.get_height(), key)
                 screen_.get_screen().fill((0, 0, 0))
-                play_.drawPlay(screen_.get_screen())
+                play_.drawPlay(screen_.get_screen(), mousePosition)
 
             pygame.display.flip()
-            pygame.time.delay(50)
+            pygame.time.delay(5)
 
     except KeyboardInterrupt:
         connection_.close_connection()
