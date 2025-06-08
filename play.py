@@ -15,6 +15,8 @@ class Play(object):
         self.game = game
         self.camera = camera.Camera()
         self.hex_size = screenHeight * 0.024
+        self.stageFields = []
+        self.phazeFields = []
 
         self.playerWfield = control_obj.Label(0, 0, screenWidth * 0.1, screenHeight // 2,
             kolor.GREEN, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
@@ -74,10 +76,77 @@ class Play(object):
             self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
             partial(play_handler.ZoomOutHandler.handle, self.getCamera()), None, None, None)
         
+        self.hex_surface = None
+        self._last_camera_state = (None, None, None)
+        self._initStageAndPhazeFields()
+        
 
     def _setMaxCamera(self, screenWidth, screenHeight):
         self.camera.setCameraX(max(0, min(self.camera.getCameraX(), self.map.getWidth() - screenWidth)))
         self.camera.setCameraY(max(0, min(self.camera.getCameraY(), self.map.getHeight() - screenHeight)))
+
+
+    def _initStageAndPhazeFields(self):
+        stages = self.game.getStagesList()
+        phazes = self.game.getPhazesList()
+        width = self.stateField.getWidth()
+        height = self.stateField.getHeight()
+        conStageHeight = int(height / 24)
+        stageheight = int(height / 24)
+        phazewidth = (width - 6) // 9
+        phazeheight = conStageHeight * 0.96 // 2
+
+        self.stageFields.clear()
+        self.phazeFields.clear()
+
+        for stage in stages:
+            stageField = control_obj.StageGraph(
+                self.stateField.getPositionX() + 3,
+                stageheight,
+                width - 6,
+                conStageHeight,
+                stage.getColour(),
+                "",
+                None,
+                int(height * 0.035),
+                kolor.WHITE,
+                None,
+                None,
+                None,
+                None,
+                stage.getSeason(),
+                stage.getText()
+            )
+            self.stageFields.append(stageField)
+            stageheight += conStageHeight + 2
+
+        stageheight = int(height / 24)
+        i = 0
+        for phaze in phazes:
+            i += 1
+            phazeField = control_obj.PhazeGraph(
+                4.8 + self.stateField.getPositionX() + (phazewidth + 2.0) * (i - 1),
+                stageheight + conStageHeight * 0.08,
+                phazewidth,
+                phazeheight,
+                phaze.getColour(),
+                "",
+                None,
+                int(height * 0.035),
+                kolor.BLACK,
+                None,
+                None,
+                None,
+                None,
+                phaze.getNrStage(),
+                phaze.getName()
+            )
+            self.phazeFields.append(phazeField)
+            if i % 8 == 0:
+                i = 0
+                stageheight += conStageHeight + 2
+
+
 
     def getCamera(self):
         return self.camera
@@ -105,12 +174,30 @@ class Play(object):
 
 
     def drawHexes(self, screen):
-        temp_surface = pygame.Surface((self.map.getWidth(), self.map.getHeight()))
-        temp_surface.fill((kolor.ORANGE))
-        hexagon.Hexagon.draw_map(temp_surface, self.getHexSize() * self.camera.getCameraScale(), 
-                -self.camera.getCameraX() * self.camera.getCameraScale(), -self.camera.getCameraY()
-                * self.camera.getCameraScale(), self.game.board.getHexes())
-        screen.blit(temp_surface, (self.map.getPositionX(), self.map.getPositionY()))
+        current_camera_state = (
+            self.camera.getCameraX(),
+            self.camera.getCameraY(),
+            self.camera.getCameraScale()
+        )
+
+        if self.hex_surface is None or current_camera_state != self._last_camera_state:
+            self._last_camera_state = current_camera_state
+            self.hex_surface = pygame.Surface((self.map.getWidth(), self.map.getHeight()))
+            self.hex_surface.fill(kolor.ORANGE)
+            hexagon.Hexagon.draw_map(
+                self.hex_surface,
+                self.getHexSize() * self.camera.getCameraScale(),
+                -self.camera.getCameraX() * self.camera.getCameraScale(),
+                -self.camera.getCameraY() * self.camera.getCameraScale(),
+                self.game.board.getHexes()
+            )
+
+        screen.blit(self.hex_surface, (self.map.getPositionX(), self.map.getPositionY()))
+
+
+    def invalidateHexSurface(self):
+        self.hex_surface = None
+
 
     def drawStagePhaze(self, screen, mousePosition):
         screen_width = screen.get_width()
@@ -118,47 +205,21 @@ class Play(object):
         max_line_width = screen_width * 0.1
         positionX = screen_width - self.stateField.getWidth() - max_line_width - 10
         positionY = mousePosition[1] - 10
-        stages = self.game.getStagesList()
-        phazes = self.game.getPhazesList()
-        width = self.stateField.getWidth()
-        height = self.stateField.getHeight()
-        conStageHeight = int(height / 24)
-        stageheight = int(height / 24)
-        phazewidth = (width - 6)// 9
-        phazeheight = conStageHeight * 0.96 // 2
-        stageFields = []
-        phazeFields = []
-    
-        for stage in stages:
-            stageField = control_obj.StageGraph(self.stateField.getPositionX() + 3, stageheight, 
-                    width - 6, conStageHeight, stage.getColour(), "", None, int(height * 0.035), 
-                    kolor.WHITE, None, None, None, None, stage.getSeason(), stage.getText())
+
+        for stageField in self.stageFields:
             stageField.draw(screen)
-            stageFields.append(stageField)
-            stageheight += conStageHeight + 2
 
-        stageheight = int(height / 24)
-        i = 0
-        for phaze in phazes:
-            i+=1
-            phazeField = control_obj.PhazeGraph(4.8 + self.stateField.getPositionX() + 
-                    (phazewidth + 2.0) * (i - 1), stageheight + conStageHeight * 0.08, phazewidth, 
-                    phazeheight, phaze.getColour(), "", None, int(height * 0.035), kolor.BLACK, None, 
-                    None, None, None, phaze.getNrStage(), phaze.getName())
+        for phazeField in self.phazeFields:
             phazeField.draw(screen)
-            phazeFields.append(phazeField)
-            if i % 8 == 0:
-                i = 0
-                stageheight += conStageHeight + 2
 
-        for phaze, phazeField in zip(phazes, phazeFields):
+        for phaze, phazeField in zip(self.game.getPhazesList(), self.phazeFields):
             if phazeField.isOverObject(mousePosition):  
                 text = f"Faza {phaze.getNrPhaze()}: {phaze.getName()}"
                 control_obj.Description.draw(screen, text, max_line_width, positionX, positionY, 
                             self.gameController.getDefaultFont(), int(screen_height * 0.015))
                 return
 
-        for stage, stageField in zip(stages, stageFields):
+        for stage, stageField in zip(self.game.getStagesList(), self.stageFields):
             if stageField.isOverObject(mousePosition):
                 text = f"ETAP {stage.getNrStage()}: {stage.getSeason()} \n {stage.getText()}"
                 control_obj.Description.draw(screen, text, max_line_width, positionX, positionY, 

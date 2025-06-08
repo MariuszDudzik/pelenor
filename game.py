@@ -17,6 +17,15 @@ class Game(object):
     
     def getPhazesList(self):
         return self.phazes
+    
+    def getPlayerSite(self, login):
+        if login == self.playerW.getLogin():
+            return 'W'
+        elif login == self.playerS.getLogin():
+            return 'S'
+    
+
+    
       
 
         

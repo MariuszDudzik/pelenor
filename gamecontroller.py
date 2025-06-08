@@ -10,6 +10,8 @@ class GameController(object):
         self.openSessions = []
         self.system = platform.system()
         self.defaultFont = None
+        self.aktStage = 0
+        self.aktPhaze = 0
         
         self._setDefaultFont()
 
