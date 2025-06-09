@@ -79,6 +79,7 @@ class Play(object):
         self.hex_surface = None
         self._last_camera_state = (None, None, None)
         self._initStageAndPhazeFields()
+        self._board_changed = True
         
 
     def _setMaxCamera(self, screenWidth, screenHeight):
@@ -147,12 +148,13 @@ class Play(object):
                 stageheight += conStageHeight + 2
 
 
-
     def getCamera(self):
         return self.camera
 
+
     def getHexSize(self):
         return self.hex_size
+
 
     def drawPlay(self, screen, mousePosition):
         self.playerWfield.draw(screen)
@@ -180,10 +182,13 @@ class Play(object):
             self.camera.getCameraScale()
         )
 
-        if self.hex_surface is None or current_camera_state != self._last_camera_state:
+        if self.hex_surface is None or current_camera_state != self._last_camera_state or self._board_changed:
             self._last_camera_state = current_camera_state
+            self._board_changed = False
+
             self.hex_surface = pygame.Surface((self.map.getWidth(), self.map.getHeight()))
             self.hex_surface.fill(kolor.ORANGE)
+
             hexagon.Hexagon.draw_map(
                 self.hex_surface,
                 self.getHexSize() * self.camera.getCameraScale(),
@@ -195,8 +200,13 @@ class Play(object):
         screen.blit(self.hex_surface, (self.map.getPositionX(), self.map.getPositionY()))
 
 
+
     def invalidateHexSurface(self):
         self.hex_surface = None
+
+
+    def notifyBoardChanged(self):
+        self._board_changed = True
 
 
     def drawStagePhaze(self, screen, mousePosition):

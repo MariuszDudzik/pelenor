@@ -16,6 +16,7 @@ class Player(object):
         self.demoralizationTreshold1 = 0
         self.demoralizationTreshold2 = 0
         self.demoralizationTreshold3 = 0
+        self.heads = 12
         self.lastPingTime = time.time()
 
 
@@ -40,11 +41,13 @@ class Player(object):
             'spellPower': self.spellPower,
             'picture': self.picture,
             'units': [unit.to_dict() for unit in self.units],
+            'heads': self.heads,
             'demoralizationTresholds': [
                 self.demoralizationTreshold1,
                 self.demoralizationTreshold2,
                 self.demoralizationTreshold3
             ],
+            
         }
       
       def from_dict(self, data):
@@ -55,6 +58,7 @@ class Player(object):
         self.picture = data.get('picture')
         self.units = [pawn.Pawn().from_dict(unit_data) for unit_data in data.get('units', [])]
         demoralizationTresholds = data.get('demoralizationTresholds', [0, 0, 0])
+        self.heads = data.get('heads')
         self.demoralizationTreshold1, self.demoralizationTreshold2, self.demoralizationTreshold3 = demoralizationTresholds
         return self
        

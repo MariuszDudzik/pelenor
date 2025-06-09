@@ -1,4 +1,5 @@
 class Pawn(object):
+    _id_counter = 1
 
     def __init__(self, name = None, nationality = None, type = None, membership = None, 
                  stageDeploy = None, forceHand = None, 
@@ -6,6 +7,8 @@ class Pawn(object):
                  defence = None, defenceR = None, morale = None, moraleR = None, 
                  demoralizationPoint = None, authority = None, authorityR = None, 
                  spellPower = None, movement = None, isRewers = None, QRS = None, graphics = None):
+        self.id = Pawn._id_counter 
+        Pawn._id_counter += 1
         self.name = name
         self.nationality = nationality
         self.unitType = type  #P, J, S, D, N, M (piechota, jazda, mumakil, dowodzca, wódz naczelny, maszyna)
@@ -45,6 +48,7 @@ class Pawn(object):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'name': self.name,
             'nationality': self.nationality,
             'unitType': self.unitType,
@@ -58,7 +62,7 @@ class Pawn(object):
             'defence': self.defence,
             'defenceR': self.defenceR,
             'morale': self.morale,
-             'moraleR': self.moraleR,
+            'moraleR': self.moraleR,
             'demoralizationPoint': self.demoralizationPoint,
             'authority': self.authority,
             'authorityR': self.authorityR,
@@ -84,6 +88,7 @@ class Pawn(object):
         }
     
     def from_dict(self, data):
+        self.id = data.get('id')
         self.name = data.get('name')
         self.nationality = data.get('nationality')
         self.unitType = data.get('unitType')
