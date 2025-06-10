@@ -17,6 +17,8 @@ class Play(object):
         self.hex_size = screenHeight * 0.024
         self.stageFields = []
         self.phazeFields = []
+        self.units = []
+        self.reinforcement = []
 
         self.playerWfield = control_obj.Label(0, 0, screenWidth * 0.1, screenHeight // 2,
             kolor.GREEN, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
@@ -205,6 +207,8 @@ class Play(object):
         self.messageField.draw(screen)
         self.actionButton.draw(screen)
 
+
+    
 
     def drawHexes(self, screen):
         current_camera_state = (

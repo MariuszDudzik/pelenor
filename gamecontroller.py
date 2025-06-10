@@ -12,6 +12,7 @@ class GameController(object):
         self.defaultFont = None
         self.aktStage = 0
         self.aktPhaze = 0
+        self.deploy = True
         
         self._setDefaultFont()
 
@@ -24,6 +25,12 @@ class GameController(object):
         else:
             self.defaultFont = 'None'
   
+    def getDeploy(self):
+        return self.deploy
+    
+    def setDeploy(self, deploy):
+        self.deploy = deploy
+
     def getSite(self):
         return self.choosedSite
     
