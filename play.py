@@ -52,7 +52,7 @@ class Play(object):
             int((self.playerSfield.getWidth()  - 9) / 2), int((self.playerSfield.getWidth()  - 9) / 2),
             kolor.BLUE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         self.playerSdemoralization = control_obj.Label(self.playerSphoto.getWidth() + 6, 
-            self.playerSlogin.getHeight() + 6 + self.playerSfield.getHeight() , int(self.playerSphoto.getWidth()), 
+            self.playerSlogin.getHeight() + 6 + self.playerSfield.getHeight() , int((self.playerSphoto.getHeight() - 3) / 2), 
             int((self.playerSphoto.getHeight() - 3) / 2), kolor.WHITE, 
             str(self.game.playerS.getDemoralizationTreshold1()), self.gameController.getDefaultFont(), 
             int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None)
@@ -60,7 +60,12 @@ class Play(object):
             self.playerSlogin.getHeight() + self.playerSdemoralization.getHeight() + 9 + self.playerSfield.getHeight(), 
             int((self.playerSphoto.getWidth() - 3) / 2), int((self.playerSphoto.getHeight() - 3) / 2), kolor.WHITE, 
             str(self.game.playerS.getSpellPower()), self.gameController.getDefaultFont(), 
-            int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None) 
+            int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None)
+        self.playerSHeads = control_obj.Label(self.playerSphoto.getWidth() + 9 + 
+            self.playerSspellPower.getWidth(), self.playerSlogin.getHeight() + 6 + self.playerSfield.getHeight(), 
+            int((self.playerSphoto.getWidth() - 3) / 2), int((self.playerSphoto.getHeight() - 3) / 2), 
+            kolor.WHITE, str(self.game.playerS.getHeads()), self.gameController.getDefaultFont(), 
+            int(self.playerSfield.getHeight() * 0.06 * 0.8), kolor.BLACK, None, None, None, None)
         self.stateField = control_obj.Label(screenWidth - screenWidth * 0.1, 0, screenWidth * 0.101, screenHeight,
             kolor.BLUE, "", None, int(screenHeight * 0.035), kolor.WHITE, None, None, None, None)
         self.map = control_obj.Label(screenWidth * 0.1, 0, screenWidth + screenWidth * 0.366, 
@@ -75,12 +80,33 @@ class Play(object):
             screenHeight * 0.0028, screenHeight * 0.028, screenHeight * 0.028, kolor.GREY, "-", 
             self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
             partial(play_handler.ZoomOutHandler.handle, self.getCamera()), None, None, None)
+        self.diceButton = control_obj.Button(
+            self.stateField.getPositionX() + (self.stateField.getWidth() // 3 // 3), len(self.game.getStagesList())
+            * (self.stateField.getHeight() / 24) + screenHeight * 0.033 + screenHeight * 0.028 + 26,
+            self.stateField.getWidth() // 3, self.stateField.getWidth() // 3, kolor.GREY, "", 
+            self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
+            None, None, None, None)
+        self.resultField = control_obj.Label(
+            self.diceButton.getPositionX() + self.diceButton.getWidth() + (self.stateField.getWidth() // 3 // 3), 
+            self.diceButton.getPositionY(),self.stateField.getWidth() // 3, self.stateField.getWidth() // 3, 
+            kolor.WHITE,  "",  self.gameController.getDefaultFont(), int(screenHeight * 0.03), kolor.BLACK, 
+            None, None, None, None)
+        self.messageField = control_obj.Label(
+            self.stateField.getPositionX() + (screenHeight * 0.0028),  self.diceButton.getPositionY() + 
+            self.diceButton.getHeight() + 10,  self.stateField.getWidth() - (screenHeight * 0.0028 * 2), 
+            screenHeight * 0.100, kolor.WHITE, "", self.gameController.getDefaultFont(), int(screenHeight * 0.025), 
+            kolor.BLACK, None, None, None, None)
+        self.actionButton = control_obj.Button(
+            self.stateField.getPositionX() + (screenHeight * 0.0028), self.messageField.getPositionY() + 
+            self.messageField.getHeight() + 3, self.stateField.getWidth() - (screenHeight * 0.0028 * 2), 
+            screenHeight * 0.045, kolor.GREY, "", self.gameController.getDefaultFont(), int(screenHeight * 0.03),
+            kolor.BLACK, None, None, None, None)
         
         self.hex_surface = None
         self._last_camera_state = (None, None, None)
         self._initStageAndPhazeFields()
         self._board_changed = True
-        
+
 
     def _setMaxCamera(self, screenWidth, screenHeight):
         self.camera.setCameraX(max(0, min(self.camera.getCameraX(), self.map.getWidth() - screenWidth)))
@@ -168,11 +194,16 @@ class Play(object):
         self.playerSphoto.draw(screen)
         self.playerSdemoralization.draw(screen)
         self.playerSspellPower.draw(screen)
+        self.playerSHeads.draw(screen)
         self.map.draw(screen)
         self.drawHexes(screen)
         self.stateField.draw(screen)
         self.drawZoomButtons(screen, mousePosition)
         self.drawStagePhaze(screen, mousePosition)
+        self.diceButton.draw(screen)
+        self.resultField.draw(screen)
+        self.messageField.draw(screen)
+        self.actionButton.draw(screen)
 
 
     def drawHexes(self, screen):

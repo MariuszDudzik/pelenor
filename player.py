@@ -89,4 +89,8 @@ class Player(object):
       def getSpellPower(self):
         return self.spellPower
 
-        
+      def getHeads(self):
+        return self.heads
+      
+      def setHeads(self, heads):
+        self.heads = heads
