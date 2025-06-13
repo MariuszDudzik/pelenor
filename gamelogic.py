@@ -54,3 +54,12 @@ class GameLogic(object):
                 line2 = unit.name
         lines = [line1, line2, line3]
         return lines
+    
+
+    @staticmethod
+    def changePotName(unit, site):
+        name = unit.name
+        if site == 'C':
+            if name == "Kocioł makieta":
+                name = "Kocioł"
+        return name

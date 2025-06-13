@@ -257,11 +257,32 @@ class Play(object):
         self.messageField.draw(screen)
         self.actionButton.draw(screen)
         self.checkReinforcement()
-        for renforcement in self.reinforcement:
-            renforcement.draw(screen)
+        self.drawUnits(screen, mousePosition)
 
 
-    
+    def drawUnits(self, screen, mousePosition):    
+        for reinforcement in self.reinforcement:
+            reinforcement.draw(screen)
+            if reinforcement.isOverObject(mousePosition):
+                screen_width = screen.get_width()
+                screen_height = screen.get_height()
+                max_line_width = screen_width * 0.08
+                site = self.gameController.getChoosedSite()
+                name = gamelogic.GameLogic.changePotName(reinforcement.unit, site)
+                text = f"{name}\n {reinforcement.unit.nationality}\n {reinforcement.text[2]}"
+                control_obj.Description.draw(screen, text, max_line_width, (self.playerWfield.getWidth() - max_line_width) // 2, mousePosition[1] - 85, self.gameController.getDefaultFont(), int(screen_height * 0.015))
+                if reinforcement.unit.getSite() == 'Z':
+                    reinforcement.setColour(kolor.RLIME)
+                elif reinforcement.unit.getSite() == 'C':
+                    reinforcement.setColour(kolor.RREDJ)
+            else:
+                if reinforcement.unit.getSite() == 'Z':
+                    reinforcement.setColour(kolor.LIME)
+                elif reinforcement.unit.getSite() == 'C':
+                    reinforcement.setColour(kolor.REDJ)
+               
+
+
     def drawHexes(self, screen):
         current_camera_state = (
             self.camera.getCameraX(),

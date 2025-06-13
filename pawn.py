@@ -129,3 +129,6 @@ class Pawn(object):
     
     def getStageDeploy(self):
         return self.stageDeploy
+    
+    def getSite(self):
+        return self.membership
