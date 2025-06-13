@@ -126,3 +126,6 @@ class Pawn(object):
         self.deploy = data.get('deploy', False)
         self.tar = data.get('tar', [])
         return self
+    
+    def getStageDeploy(self):
+        return self.stageDeploy

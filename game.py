@@ -23,6 +23,12 @@ class Game(object):
             return 'W'
         elif login == self.playerS.getLogin():
             return 'S'
+        
+    def getPlayerWUnits(self):
+        return self.playerW.getUnits()
+    
+    def getPlayerSUnits(self):
+        return self.playerS.getUnits()
     
 
     

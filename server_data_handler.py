@@ -12,6 +12,7 @@ class MessageFromClient(object):
         spellPower = gamelogic.GameLogic.describeSpellPower(site)
         player_ = player.Player(name, site, login, spellPower, clientSocket)
         player_.setUnits(player_.createArmy(site))
+        player_.shuffle()
         board_ = board.Board()
         return(player_, board_)
     
@@ -36,6 +37,7 @@ class MessageFromClient(object):
         spellPower = gamelogic.GameLogic.describeSpellPower(site)
         player_ = player.Player(name, site, login, spellPower, clientSocket)
         player_.setUnits(player_.createArmy(site))
+        player_.shuffle()
         return player_
     
     

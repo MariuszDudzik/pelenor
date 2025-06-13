@@ -58,7 +58,7 @@ def main():
                 play_.drawPlay(screen_.get_screen(), mousePosition)
 
             pygame.display.flip()
-            clock.tick(60)
+            clock.tick(20)
 
     except KeyboardInterrupt:
         connection_.close_connection()

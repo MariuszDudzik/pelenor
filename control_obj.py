@@ -161,6 +161,35 @@ class PhazeGraph(ControlObj):
         self.nrPhaze = nrphaze
 
 
+class UnitGraph(ControlObj):
+    def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
+                 unit):
+        super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+        self.unit = unit
+
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.colour, (self.positionX, self.positionY, 
+                                            self.width, self.height))
+
+        unit_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        unit_surface.fill(self.colour)
+
+        font = pygame.font.SysFont(self.fontStyle, self.fontSize)
+
+        line = self.text
+        lineHeight = int(self.height * 0.95 / 3)
+
+        for i, tekst in enumerate(line):
+            text_surface = font.render(tekst, True, self.fontColour)
+            rect = text_surface.get_rect(centerx=self.width // 2, top=1 + i * lineHeight)
+            unit_surface.blit(text_surface, rect)
+
+        screen.blit(unit_surface, (self.positionX, self.positionY))
+
+
 class Description(object):
 
     @staticmethod

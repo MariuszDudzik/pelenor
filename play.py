@@ -4,12 +4,14 @@ import pygame
 import hexagon
 import camera
 import play_handler
+import gamelogic
 from functools import partial # Powoduje, że funkcja x() jest wywoływana bez argumentów
 
 class Play(object):
 
     def __init__(self, screenWidth, screenHeight, gameController, connection, game):
 
+        self.screenHeight = screenHeight
         self.gameController = gameController
         self.connection = connection
         self.game = game
@@ -110,6 +112,54 @@ class Play(object):
         self._board_changed = True
 
 
+    def checkReinforcement(self):
+        if self.gameController.getDeploy():
+            self.addReinforcement()
+
+
+    def addReinforcement(self):
+        unitW = self.game.getPlayerWUnits()
+        unitS = self.game.getPlayerSUnits()
+        width = (self.playerWfield.getWidth() - 15) // 4
+        height = width
+        margin = 3 
+        quantityInRow = int(self.playerWfield.getWidth() // (width + margin))
+
+        inRow = 0
+        column = 0
+      
+        for unit in unitW:
+            if unit.getStageDeploy() <= self.gameController.getAktStage():
+                if inRow <= quantityInRow:
+                    positionX = self.playerWfield.getPositionX() + 3 + (width + margin) * inRow
+                    positionY = self.playerWphoto.getPositionY() + self.playerWphoto.getHeight() + 3 + (height + margin) * column
+                    unitG = control_obj.UnitGraph(
+                        positionX, positionY, width, height, kolor.LIME, gamelogic.GameLogic.unitFullString(unit, self.gameController.getChoosedSite()), self.gameController.getDefaultFont(), int(height * 0.94 / 3), kolor.BLACK, None, None, None, None, unit)
+                    self.reinforcement.append(unitG)
+                    inRow += 1
+                    if inRow == quantityInRow:
+                        inRow = 0
+                        column += 1
+
+        inRow = 0
+        column = 0
+      
+        for unit in unitS:
+            if unit.getStageDeploy() <= self.gameController.getAktStage():
+                if inRow <= quantityInRow:
+                    positionX = self.playerWfield.getPositionX() + 3 + (width + margin) * inRow
+                    positionY = self.playerSphoto.getPositionY() + self.playerSphoto.getHeight() + 3 + (height + margin) * column
+                    unitG = control_obj.UnitGraph(
+                        positionX, positionY, width, height, kolor.REDJ, gamelogic.GameLogic.unitFullString(unit, self.gameController.getChoosedSite()), self.gameController.getDefaultFont(), int(height * 0.94 / 3), kolor.BLACK, None, None, None, None, unit)
+                    self.reinforcement.append(unitG)
+                    inRow += 1
+                    if inRow == quantityInRow:
+                        inRow = 0
+                        column += 1
+
+        self.gameController.setDeploy(False)         
+
+
     def _setMaxCamera(self, screenWidth, screenHeight):
         self.camera.setCameraX(max(0, min(self.camera.getCameraX(), self.map.getWidth() - screenWidth)))
         self.camera.setCameraY(max(0, min(self.camera.getCameraY(), self.map.getHeight() - screenHeight)))
@@ -206,10 +256,12 @@ class Play(object):
         self.resultField.draw(screen)
         self.messageField.draw(screen)
         self.actionButton.draw(screen)
+        self.checkReinforcement()
+        for renforcement in self.reinforcement:
+            renforcement.draw(screen)
 
 
     
-
     def drawHexes(self, screen):
         current_camera_state = (
             self.camera.getCameraX(),
