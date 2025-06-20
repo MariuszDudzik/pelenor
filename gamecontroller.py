@@ -13,6 +13,7 @@ class GameController(object):
         self.aktStage = 0
         self.aktPhaze = 0
         self.deploy = True
+        self.redraw = True
         
         self._setDefaultFont()
 
@@ -25,6 +26,12 @@ class GameController(object):
         else:
             self.defaultFont = 'None'
   
+    def getRedraw(self):
+        return self.redraw
+    
+    def setRedraw(self, redraw):
+        self.redraw = redraw
+
     def getDeploy(self):
         return self.deploy
     

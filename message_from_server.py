@@ -30,11 +30,13 @@ class MessageFromServer(object):
 
     def listSessions(self, data):
             self.gameController.setOpenSessions(data['sessions'])
+            self.gameController.setRedraw(True)
 
 
     def joinedGame(self, data):
         if 'sessionID' in data:
             self.gameController.setSessionID(data['sessionID'])
+            self.gameController.setRedraw(True)
             print(f"Dołączono do gry: {self.gameController.getSessionID()}")
         else:
             print(f"Nie można dołączyć do gry: {data.get('error', 'Nieznany błąd')}")
