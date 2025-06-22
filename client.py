@@ -8,7 +8,7 @@ import select
 import struct
 
 class Client(object):
-    def __init__(self, gameController, game):
+    def __init__(self, gameController, game, eventbus):
         self.clientSocket = None
         self.serverAddress = None
         self.port = None
@@ -17,7 +17,7 @@ class Client(object):
         self.tping = None
         self.treceive = None
         self.stop_event = threading.Event()
-        self.messageFromServer = message_from_server.MessageFromServer(gameController, game)
+        self.messageFromServer = message_from_server.MessageFromServer(gameController, game, eventbus)
         self.messageToServer = message_to_server.MessageToServer(gameController, game)
 
         self._loadServerAddress()

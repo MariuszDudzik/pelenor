@@ -1,5 +1,5 @@
 import kolor
-import dict
+import dictionary as dictionary
 
 class Phaze(object):
     def __init__(self, nrstage = 0, nrphaze = 0, colour = None, name = None):
@@ -25,7 +25,7 @@ def createPhaze():
     list = []
     for j in range(0, 16):
         for i in range(1, 9):
-            name = dict.phaze[i]
+            name = dictionary.phaze[i]
             obj = Phaze(j + 1, i, kolor.GREY, name)
             list.append(obj)
     return list

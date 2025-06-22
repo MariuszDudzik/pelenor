@@ -1,4 +1,4 @@
-import dict
+import dictionary as dictionary
 import kolor
 
 class Stage(object):
@@ -24,8 +24,8 @@ class Stage(object):
 def createStage():
     list = []
     for i in range(1, 17):
-        season = dict.stage[i][0]
-        text = dict.stage[i][1]
+        season = dictionary.stage[i][0]
+        text = dictionary.stage[i][1]
         if i >= 2 and i <= 6:
             colour = kolor.PERU
         else:

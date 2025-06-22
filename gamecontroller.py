@@ -25,6 +25,12 @@ class GameController(object):
         else:
             self.defaultFont = 'None'
   
+    def getRedrawSessions(self):
+        return self.redrawSessions
+    
+    def setRedrawSessions(self, redraw):
+        self.redrawSessions = redraw
+
     def getDeploy(self):
         return self.deploy
     

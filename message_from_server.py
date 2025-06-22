@@ -1,8 +1,9 @@
 
 class MessageFromServer(object):
-    def __init__(self, gameController, game):
+    def __init__(self, gameController, game, eventbus):
         self.gameController = gameController
         self.game = game
+        self.eventbus = eventbus
 
 
     def serverResponseHandle(self, data):
@@ -30,11 +31,13 @@ class MessageFromServer(object):
 
     def listSessions(self, data):
             self.gameController.setOpenSessions(data['sessions'])
+            self.eventbus.emit("sessions_updated", data['sessions'])
 
 
     def joinedGame(self, data):
         if 'sessionID' in data:
             self.gameController.setSessionID(data['sessionID'])
+            self.eventbus.emit("sessions_updated", self.gameController.getOpenSessions())
             print(f"Dołączono do gry: {self.gameController.getSessionID()}")
         else:
             print(f"Nie można dołączyć do gry: {data.get('error', 'Nieznany błąd')}")
@@ -45,8 +48,8 @@ class MessageFromServer(object):
         self.game.playerW.from_dict(player_data)
         player_data = data['data']['playerS']
         self.game.playerS.from_dict(player_data)
-        player_date = data['data']['board']
-        self.game.board.from_dict(player_date)
+        player_data = data['data']['board']
+        self.game.board.from_dict(player_data)
         print("Gra rozpoczęta")
         self.gameController.setInGame(False)
 
