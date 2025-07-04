@@ -66,7 +66,7 @@ def main():
                     play_.drawMap(mousePosition)
                     clear = False
     
-                play_.start(mousePosition)
+                play_.render(mousePosition)
                 play_.updateMovement(key)
                 play_.handleMouseMotion(mousePosition, event)
                 

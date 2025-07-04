@@ -28,6 +28,7 @@ class Play(object):
         self.rightMenuGraphics = pygame.sprite.LayeredDirty()
         self.allHexGraphics = pygame.sprite.LayeredDirty()
         self.manageGraphics = pygame.sprite.LayeredDirty()
+        self.stagePhazeGraphics = pygame.sprite.LayeredDirty()
         self.mouse_dragging = False
         self.last_mouse_pos = None 
 
@@ -98,6 +99,7 @@ class Play(object):
         self.actionButton = control_obj.Button(self.stateField.getPositionX() + (screen.get_height() * 0.0028), 
                             self.messageField.getPositionY() + self.messageField.getHeight() + 3, self.stateField.getWidth() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.045, kolor.GREY, "", self.gameController.getDefaultFont(), int(screen.get_height() * 0.03),kolor.BLACK, None, None, None, None, None, None)
         
+        self._initStageAndPhazeFields()
         self._prepareGraphics()
         self.setHexes()
         self.camera.setMinX(-0.066 * self.screen.get_height() * 44)
@@ -127,7 +129,72 @@ class Play(object):
         self.manageGraphics.add(self.zoomInButton, self.zoomOutButton, self.diceButton, self.resultField,
                                 self.messageField, self.actionButton, layer=4)
         self.mapGraphics.add(self.map, layer=1)
+        for sprite in self.stageFields:
+            self.stagePhazeGraphics.add(sprite, layer=2)
+        for sprite in self.phazeFields:
+            self.stagePhazeGraphics.add(sprite, layer=3)
   
+
+    def _initStageAndPhazeFields(self):
+        stages = self.game.getStagesList()
+        phazes = self.game.getPhazesList()
+        width = self.stateField.getWidth()
+        height = self.stateField.getHeight()
+        conStageHeight = int(height / 24)
+        stageheight = int(height / 24)
+        phazewidth = (width - 6) // 9
+        phazeheight = conStageHeight * 0.96 // 2
+
+        self.stageFields.clear()
+        self.phazeFields.clear()
+
+        for stage in stages:
+            stageField = control_obj.StageGraph(
+                self.stateField.getPositionX() + 3,
+                stageheight,
+                width - 6,
+                conStageHeight,
+                stage.getColour(),
+                "",
+                None,
+                int(height * 0.035),
+                kolor.WHITE,
+                None,
+                None,
+                None,
+                None,
+                stage.getSeason(),
+                stage.getText()
+            )
+            self.stageFields.append(stageField)
+            stageheight += conStageHeight + 2
+
+        stageheight = int(height / 24)
+        i = 0
+        for phaze in phazes:
+            i += 1
+            phazeField = control_obj.PhazeGraph(
+                4.8 + self.stateField.getPositionX() + (phazewidth + 2.0) * (i - 1),
+                stageheight + conStageHeight * 0.08,
+                phazewidth,
+                phazeheight,
+                phaze.getColour(),
+                "",
+                None,
+                int(height * 0.035),
+                kolor.BLACK,
+                None,
+                None,
+                None,
+                None,
+                phaze.getNrStage(),
+                phaze.getName()
+            )
+            self.phazeFields.append(phazeField)
+            if i % 8 == 0:
+                i = 0
+                stageheight += conStageHeight + 2
+
 
     def setAllDirty(self):
         for sprite in self.leftMenuGraphics:
@@ -140,6 +207,8 @@ class Play(object):
             sprite.setDirty()
         for sprite in self.manageGraphics:
             sprite.setDirty()
+        for sprite in self.stagePhazeGraphics:
+            sprite.setDirty()
 
 
     def drawMap(self, mousePosition):
@@ -151,7 +220,7 @@ class Play(object):
             pygame.display.update(all_dirty_rects)
 
 
-    def start(self, mousePosition):
+    def render(self, mousePosition):
         all_dirty_rects = []
 
         self.drawMap(mousePosition)
@@ -166,6 +235,10 @@ class Play(object):
 
         self.manageGraphics.update(mousePosition)
         dirty_rects = self.manageGraphics.draw(self.screen.get_screen())
+        all_dirty_rects.extend(dirty_rects)
+
+        self.stagePhazeGraphics.update(mousePosition)
+        dirty_rects = self.stagePhazeGraphics.draw(self.screen.get_screen())
         all_dirty_rects.extend(dirty_rects)
 
         self.allHexGraphics.update(mousePosition)
