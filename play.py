@@ -29,6 +29,7 @@ class Play(object):
         self.allHexGraphics = pygame.sprite.LayeredDirty()
         self.manageGraphics = pygame.sprite.LayeredDirty()
         self.stagePhazeGraphics = pygame.sprite.LayeredDirty()
+        self.toolTipGraphics = pygame.sprite.LayeredDirty()
         self.mouse_dragging = False
         self.last_mouse_pos = None 
 
@@ -98,12 +99,15 @@ class Play(object):
                             self.diceButton.getPositionY() + self.diceButton.getHeight() + 10,  self.stateField.getWidth() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.100, kolor.WHITE, "", self.gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, None, None, None, None, None, None)
         self.actionButton = control_obj.Button(self.stateField.getPositionX() + (screen.get_height() * 0.0028), 
                             self.messageField.getPositionY() + self.messageField.getHeight() + 3, self.stateField.getWidth() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.045, kolor.GREY, "", self.gameController.getDefaultFont(), int(screen.get_height() * 0.03),kolor.BLACK, None, None, None, None, None, None)
+        self.toolTip = control_obj.Tooltip(0, 0, 0, 0, kolor.WHITE, "", self.gameController.getDefaultFont()
+                            , int(screen.get_height() * 0.015), kolor.BLACK, None, None, None, None, None, None)
         
         self._initStageAndPhazeFields()
         self._prepareGraphics()
         self.setHexes()
         self.camera.setMinX(-0.066 * self.screen.get_height() * 44)
         self.camera.setMinY(-0.066 * self.screen.get_height() * 31)
+        self.toolTip.dirty = 0
 
 
     def setHexBaseSize(self):
@@ -133,6 +137,7 @@ class Play(object):
             self.stagePhazeGraphics.add(sprite, layer=2)
         for sprite in self.phazeFields:
             self.stagePhazeGraphics.add(sprite, layer=3)
+        self.toolTipGraphics.add(self.toolTip, layer=5)
   
 
     def _initStageAndPhazeFields(self):
@@ -149,13 +154,14 @@ class Play(object):
         self.phazeFields.clear()
 
         for stage in stages:
+            text =  f"ETAP {stage.getNrStage()}: {stage.getSeason()} \n {stage.getText()}"
             stageField = control_obj.StageGraph(
                 self.stateField.getPositionX() + 3,
                 stageheight,
                 width - 6,
                 conStageHeight,
                 stage.getColour(),
-                "",
+                text,
                 None,
                 int(height * 0.035),
                 kolor.WHITE,
@@ -163,8 +169,10 @@ class Play(object):
                 None,
                 None,
                 None,
-                stage.getSeason(),
-                stage.getText()
+                partial(play_handler.ToolTipHandler.onHover, get_toolTip=self.getToolTip, screen_width=self.screen.get_width(), state_field_width=self.stateField.getWidth()),
+                partial(play_handler.ToolTipHandler.unHover, play_obj=self),
+                stage,
+               
             )
             self.stageFields.append(stageField)
             stageheight += conStageHeight + 2
@@ -172,6 +180,7 @@ class Play(object):
         stageheight = int(height / 24)
         i = 0
         for phaze in phazes:
+            text = f"Faza {phaze.getNrPhaze()}: {phaze.getName()}"
             i += 1
             phazeField = control_obj.PhazeGraph(
                 4.8 + self.stateField.getPositionX() + (phazewidth + 2.0) * (i - 1),
@@ -179,7 +188,7 @@ class Play(object):
                 phazewidth,
                 phazeheight,
                 phaze.getColour(),
-                "",
+                text,
                 None,
                 int(height * 0.035),
                 kolor.BLACK,
@@ -187,8 +196,9 @@ class Play(object):
                 None,
                 None,
                 None,
-                phaze.getNrStage(),
-                phaze.getName()
+                partial(play_handler.ToolTipHandler.onHover, get_toolTip=self.getToolTip, screen_width=self.screen.get_width(), state_field_width=self.stateField.getWidth()),
+                partial(play_handler.ToolTipHandler.unHover, play_obj=self),
+                phaze,
             )
             self.phazeFields.append(phazeField)
             if i % 8 == 0:
@@ -223,7 +233,15 @@ class Play(object):
     def render(self, mousePosition):
         all_dirty_rects = []
 
-        self.drawMap(mousePosition)
+        self.mapGraphics.update(mousePosition)
+        dirty_rects = self.mapGraphics.draw(self.screen.get_screen())
+        all_dirty_rects.extend(dirty_rects)
+
+        self.allHexGraphics.update(mousePosition)
+        for hex_sprite in self.allHexGraphics:
+            if hex_sprite.dirty:
+                hex_sprite.draw(self.screen.get_screen())
+                all_dirty_rects.append(hex_sprite.rect.copy())
      
         self.leftMenuGraphics.update(mousePosition)
         dirty_rects = self.leftMenuGraphics.draw(self.screen.get_screen())
@@ -241,11 +259,9 @@ class Play(object):
         dirty_rects = self.stagePhazeGraphics.draw(self.screen.get_screen())
         all_dirty_rects.extend(dirty_rects)
 
-        self.allHexGraphics.update(mousePosition)
-        for hex_sprite in self.allHexGraphics:
-            if hex_sprite.dirty:
-                hex_sprite.draw(self.screen.get_screen())
-                all_dirty_rects.append(hex_sprite.rect.copy())
+        self.toolTipGraphics.update(mousePosition)
+        dirty_rects = self.toolTipGraphics.draw(self.screen.get_screen())
+        all_dirty_rects.extend(dirty_rects)
 
         if all_dirty_rects:
             pygame.display.update(all_dirty_rects)
@@ -262,6 +278,9 @@ class Play(object):
     
     def getMap(self):
         return self.map
+    
+    def getToolTip(self):
+        return self.toolTip
 
     def get_visible_hexagons(self, map_area, camera, hex_size, hexes):
       
@@ -328,6 +347,7 @@ class Play(object):
         self.zoomInButton.handle_event(mousePosition, event)
         self.zoomOutButton.handle_event(mousePosition, event)
         self.map.handle_event(mousePosition, event)
+        self.toolTip.handle_event(mousePosition, event)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -338,12 +358,6 @@ class Play(object):
             if event.button == 1:
                 self.mouse_dragging = False
                 self.last_mouse_pos = None
-    
-
-    def handleIn(get_camera, get_hexes, get_map, setHexes):
-      camera = get_camera()
-      camera.setCameraScale(1.85)
-      setHexes()
 
 
     def handleMouseMotion(self, mousePosition, event):

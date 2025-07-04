@@ -4,7 +4,6 @@ import support
 import pygame
 import kolor
 import support
-
 import pygame
 import kolor
 import support
@@ -57,8 +56,9 @@ class ControlObj(pygame.sprite.DirtySprite):
                 label_rect = label.get_rect(center=(self.width // 2, self.height // 2))
                 self.image.blit(label, label_rect)
 
-
+   
     def update(self, mousePosition=None):
+        
         if mousePosition is not None:
             is_hovering = self.isOverObject(mousePosition)
             if is_hovering and not self.hovered:
@@ -74,7 +74,7 @@ class ControlObj(pygame.sprite.DirtySprite):
         
         if self.dirty == 1:
             self._updateImage()
-
+    
 
     def getSurface(self):
         return self.surface
@@ -128,6 +128,14 @@ class ControlObj(pygame.sprite.DirtySprite):
     
     def getRect(self):
         return self.rect
+    
+    def setPositionX(self, positionX):
+        self.positionX = positionX
+        self.rect.topleft = (self.positionX, self.positionY)
+    
+    def setPositionY(self, positionY):
+        self.positionY = positionY
+        self.rect.topleft = (self.positionX, self.positionY)
     
 
     def handle_event(self, mousePosition, event):
@@ -299,21 +307,19 @@ class Button(ControlObj):
 class StageGraph(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
                  fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
-                 season=None, nrStage=None):
+                 stageObj=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
-        self.season = season
-        self.nrStage = nrStage
+        self.stageObj = stageObj
 
 
 class PhazeGraph(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
                  fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
-                 nrstage=None, nrphaze=None):
+                 phazeObj=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
-        self.nrStage = nrstage
-        self.nrPhaze = nrphaze
+        self.phazeObj = phazeObj
 
 
 class UnitGraph(ControlObj):
@@ -345,21 +351,52 @@ class UnitGraph(ControlObj):
         screen.blit(unit_surface, (self.positionX, self.positionY))
 
 
-class Description(object):
+class Tooltip(ControlObj):
+    def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
+                 fontSize, fontColour, onClickLeft=None, onClickRight=None, 
+                 onScroll4=None, onScroll5=None, onHover=None, onUnhover=None):
+        super().__init__(positionX, positionY, width, height, colour, text, fontStyle,
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
+                onHover, onUnhover)
+        self.wrapped_lines = []  # Dodaj to
+        
+    def _updateImage(self):
+        # Override bazowej metody - nie rób nic jeśli mamy wrapped lines
+        if hasattr(self, 'wrapped_lines') and self.wrapped_lines:
+            return  # Nie rób nic, już jest renderowane przez _renderWrappedLines
+        else:
+            # Wywołaj bazową metodę dla normalnego tekstu
+            super()._updateImage()
 
-    @staticmethod
-    def draw(screen, text, max_line_width, positionX, positionY, fontStyle, fontSize):
-        font = pygame.font.SysFont(fontStyle, fontSize)
-        line = support.Wrap.wrap_text(text, font, max_line_width)
+
+    def setTextWrapped(self, text, max_line_width):
+        self.text = text
+        if not self.fontStyle or not self.fontSize:
+            return
+            
+        font = pygame.font.SysFont(self.fontStyle, self.fontSize)
+        lines = support.Wrap.wrap_text(text, font, max_line_width)
+        self.wrapped_lines = lines
+
         width = max_line_width + 10
-        height = len(line) * (font.get_height() + 5) + 10
-        rect = pygame.Rect(positionX, positionY, width, height)
-        menu_surface = pygame.Surface((width, height))
-        menu_surface.fill((kolor.WHITE))
-        for i, row in enumerate(line):
-            tekst_surface = font.render(row, True, kolor.BLACK)
-            menu_surface.blit(tekst_surface, (5, 5 + i * (font.get_height() + 5)))
-        screen.blit(menu_surface, (positionX, positionY))
+        height = len(lines) * (font.get_height() + 5) + 10
+
+        self.width = width
+        self.height = height
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(topleft=(self.positionX, self.positionY))
+
+        self._renderWrappedLines(lines, font)
+        self.setDirty()
+
+
+    def _renderWrappedLines(self, lines, font):
+        self.image.fill(kolor.WHITE)
+        for i, line in enumerate(lines):
+            text_surface = font.render(line, True, kolor.BLACK)
+            self.image.blit(text_surface, (5, 5 + i * (font.get_height() + 5)))
+
+
 
 
 

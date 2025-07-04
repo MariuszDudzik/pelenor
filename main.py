@@ -70,8 +70,7 @@ def main():
                 play_.updateMovement(key)
                 play_.handleMouseMotion(mousePosition, event)
                 
-           
-            clock.tick(30)
+            clock.tick(60)
 
     except KeyboardInterrupt:
         connection_.close_connection()
