@@ -2,7 +2,7 @@ import platform
 
 class GameController(object):
     def __init__(self):
-        self.inGame = True
+        self.inGame = False
         self.sessionID = None
         self.markedSessionID = None
         self.choosedSite = None

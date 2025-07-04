@@ -18,9 +18,10 @@ def main():
     play_ = play.Play(screen_, gameController_, connection_, game_)
     clock = pygame.time.Clock()
     screen_.fill_background((0, 0, 0))
-
+  
     try:
         connection_.startConnection()
+        clear = True
         while True:
             mousePosition = pygame.mouse.get_pos()
             key = pygame.key.get_pressed()
@@ -44,8 +45,14 @@ def main():
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         play_.handleEvent(mousePosition, event)
+                    elif event.type == pygame.MOUSEBUTTONUP:
+                        play_.handleEvent(mousePosition, event)
                     elif event.type == pygame.KEYDOWN:
                         play_.handleKeyboardEvent(event)
+                    elif event.type == pygame.VIDEOEXPOSE or event.type == pygame.ACTIVEEVENT:
+                        play_.setAllDirty()
+                        screen_ = screen.Screen()
+                        screen_.fill_background((0, 0, 0))
                    
             
             if gameController_.getInGame():
@@ -55,14 +62,15 @@ def main():
                     connection_.gameClient()
                     connection_.setAction(None)
             else:
-                play_.updateMovement(screen_, key)
+                if clear:
+                    play_.drawMap(mousePosition)
+                    clear = False
+    
+                play_.start(mousePosition)
+                play_.updateMovement(key)
+                play_.handleMouseMotion(mousePosition, event)
                 
-             #   if screen_.get_redraw2():
-                #    screen_.get_screen().fill((0, 0, 0))
-               #     play_.drawPlay(screen_.get_screen(), mousePosition)
-                #    screen_.set_redraw2(False)
-              #      pygame.display.flip()
-
+           
             clock.tick(30)
 
     except KeyboardInterrupt:

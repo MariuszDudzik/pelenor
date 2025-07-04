@@ -18,40 +18,38 @@ class Menu(object):
         self.choiceSbutton = control_obj.Button(screen.get_width() / 2 - screen.get_width() * 0.14, 
             screen.get_height() / 3 - screen.get_height() * 0.09, screen.get_width() * 0.14, screen.get_height() * 0.065, 
             kolor.DGREY, "Sauron", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, 
-            self.choiceSbuttonLC, None, None, None)    
+            self.choiceSbuttonLC, None, None, None, None, None)    
         self.choiceWbutton = control_obj.Button(screen.get_width() / 2 + screen.get_width() * 0.014, 
             screen.get_height() / 3 - screen.get_height() * 0.09, screen.get_width() * 0.14, screen.get_height() * 0.065, 
             kolor.DGREY, "Westerneńczyk", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, 
-            self.choiceWbuttonLC, None, None, None)
+            self.choiceWbuttonLC, None, None, None, None, None)
         self.createButton = control_obj.Button(screen.get_width() / 2 - screen.get_width() * 0.07, 
             screen.get_height() / 3, screen.get_width() * 0.14, screen.get_height() * 0.065, kolor.BLUE, "Stwórz Grę", 
-            gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.createGame, None, None, None)
+            gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.createGame, None, None, None, None, None)
         self.joinButton = control_obj.Button(screen.get_width() / 2 + screen.get_width() * 0.014, 
             screen.get_height() / 3 + screen.get_height() * 0.09, screen.get_width() * 0.14, screen.get_height() * 0.065, 
-            kolor.GREEN, "Dołącz do Gry", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.joinGame,  None, None, None)   
+            kolor.GREEN, "Dołącz do Gry", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.joinGame,  None, None, None, None, None)   
         self.exitButton = control_obj.Button(screen.get_width() / 2 - screen.get_width() * 0.07, 
             screen.get_height() / 3 + screen.get_height() * 0.45, screen.get_width() * 0.14, screen.get_height() * 0.065, 
-            kolor.RED, "Zakończ", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.exitGame, None, None, None)
+            kolor.RED, "Zakończ", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.exitGame, None, None, None, None, None)
         self.loginLabel = control_obj.Label(screen.get_width() / 2 - screen.get_width() * 0.15, 
             screen.get_height() / 3 - screen.get_height() * 0.15, screen.get_width() * 0.08, screen.get_height() * 0.032, 
-            kolor.BLACK, "Wpisz login:", gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.WHITE, None, None, None, None)
+            kolor.BLACK, "Wpisz login:", gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.WHITE, None, None, None, None, None, None)
         self.loginText = control_obj.TextBox(screen.get_width() / 2 - screen.get_width() * 0.07, 
             screen.get_height() / 3 - screen.get_height() * 0.15, screen.get_width() * 0.14, screen.get_height() * 0.032, 
-            kolor.GREY, "", gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, self.loginTextActive, None, None, None, kolor.WHITE,)
+            kolor.GREY, "", gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, self.loginTextActive, None, None, None, None, None, kolor.WHITE,)
         self.sessionLabel = control_obj.LabelWithScroll(screen.get_width() / 2 - screen.get_width() * 0.175, 
             screen.get_height() / 3 + screen.get_height() * 0.18, screen.get_width() * 0.37, screen.get_height() * 0.16, 
-            kolor.GREY, "", gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, self.chooseSession, None, 
-            self.setScrollOffsetUp, self.setScrollOffsetDown)
+            kolor.GREY, "", gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, self.chooseSession, None, self.setScrollOffsetUp, self.setScrollOffsetDown, None, None)
         self.countSessionLabel = control_obj.Label(screen.get_width() / 2 - screen.get_width() * 0.175, 
             screen.get_height() / 3 + screen.get_height() * 0.345, screen.get_width() * 0.37, screen.get_height() * 0.032, kolor.GREY, f"Liczba dostępnych sesji: {self.gameController.getCountOpenSessions()}", 
-            gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, None, None, None, None)
+            gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, None, None, None, None, None, None)
         self.showSessionButton = control_obj.Button(screen.get_width() / 2 - screen.get_width() * 0.14, 
             screen.get_height() / 3 + screen.get_height() * 0.09, screen.get_width() * 0.14, screen.get_height() * 0.065, 
-            kolor.GREEN, "Pokaż Sesje", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.showSession, 
-            None, None, None)
+            kolor.GREEN, "Pokaż Sesje", gameController.getDefaultFont(), int(screen.get_height() * 0.035), kolor.WHITE, self.showSession, None, None, None, None, None)
         self.stateLabel = control_obj.Label(screen.get_width() / 2 - screen.get_width() * 0.39, 
             screen.get_height() / 3 + screen.get_height() * 0.38, screen.get_width() * 0.80, screen.get_height() * 0.032, 
-            kolor.BLACK, self.connection.getConnectionStatus() , gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.WHITE, None, None, None, None)
+            kolor.BLACK, self.connection.getConnectionStatus() , gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.WHITE, None, None, None, None, None, None)
 
         self.eventbus.subscribe("sessions_updated", self.refresh_sessions_view)
         self._prepareGraphics()
@@ -62,7 +60,6 @@ class Menu(object):
                           self.joinButton, self.exitButton, self.loginLabel, 
                           self.loginText, self.sessionLabel, self.countSessionLabel, 
                           self.showSessionButton, self.stateLabel)
-
 
 
     def setAllDirty(self):

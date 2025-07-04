@@ -1,4 +1,5 @@
 import pygame
+import kolor
 
 class Screen(object):
 
@@ -8,7 +9,8 @@ class Screen(object):
         self._height = info.current_h
         self._screen = pygame.display.set_mode((self._width, self._height), pygame.FULLSCREEN)
         self.background = pygame.Surface(self._screen.get_size())
-        self.background.fill((0, 0, 0))
+        self.background.fill((0,0,0))
+
 
         pygame.display.set_caption("Bitwa na polach pelennoru")
 

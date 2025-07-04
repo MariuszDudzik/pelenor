@@ -2,17 +2,118 @@ import pygame
 import math
 import collections
 import kolor
+from pygame.sprite import DirtySprite
 
 Point = collections.namedtuple("Point", ["x", "y"])
 Hex = collections.namedtuple("Hex", ["q", "r", "s"])
 
-class Hexagon(object):
+class HexGraphic(DirtySprite):
+    def __init__(self, position, logical_hex, base_center, base_size, fill_color, outline_colors, 
+        thickness, map_area=None):
+        super().__init__()
+        self.position = position  # (q, r, s)
+        self.logical_hex = logical_hex
+        self.base_center = base_center
+        self.base_size = base_size    
+        self.current_center = base_center
+        self.current_size = base_size
+        self.fill_color = fill_color
+        self.outline_colors = outline_colors
+        self.thickness = thickness
+        self.dirty = 1
+        self.zoom_level = 1.0
+        self.map_area = map_area
+        
+        self._update_image()
+        
+    def _update_image(self):
+        diameter = int(2 * self.current_size + max(self.thickness) * 2)
+        self.image = pygame.Surface((diameter, diameter ), pygame.SRCALPHA)
+        
+        center_on_surface = Point(diameter//2, diameter//2)
+        corners = Hexagon.polygon_corners(center_on_surface, self.current_size)
+        points = [(p.x, p.y) for p in corners]
+        pygame.draw.polygon(self.image, self.fill_color, points)
+        
+        scaled_thickness = [max(1, int(t * self.zoom_level)) for t in self.thickness]
+        
+        for i in range(6):
+            start_pos = points[i]
+            end_pos = points[(i + 1) % 6]
+            pygame.draw.line(self.image, self.outline_colors[i], start_pos, end_pos, scaled_thickness[i])
+        
+        self.rect = self.image.get_rect(center=(self.current_center.x, self.current_center.y))
+
+    
+    def draw(self, surface):
+        if not self.dirty:
+            return
+            
+        if self.map_area is not None and not self.is_visible_in_map_area():
+            return
+            
+        old_clip = surface.get_clip()
+        
+        if self.map_area is not None:
+            surface.set_clip(self.map_area)
+        
+        surface.blit(self.image, self.rect)
+        surface.set_clip(old_clip)
+        
+        self.dirty = 0
+
+    
+    def update(self, mouse_pos=None):
+        if self.dirty:
+            self._update_image()
+
+    
+    def update_from_logical(self):
+        self.fill_color = Hexagon.field_colour(self.position, {self.position: self.logical_hex})
+        self.outline_colors = Hexagon.side_colours(self.position, {self.position: self.logical_hex})
+        self.thickness = Hexagon.side_thickness(self.position, {self.position: self.logical_hex})
+        self.dirty = 1
+    
+   
+    def setDirty(self):
+        self.dirty = 1
+        self.update_from_logical()
+    
+    
+    def is_visible_in_map_area(self, margin=20):
+      
+        if self.map_area is None:
+            return True
+            
+        hex_radius = self.current_size + max(self.thickness)
+        hex_rect = pygame.Rect(
+            self.current_center.x - hex_radius - margin,
+            self.current_center.y - hex_radius - margin,
+            2 * hex_radius + 2 * margin,
+            2 * hex_radius + 2 * margin
+        )
+        
+        return self.map_area.getRect().colliderect(hex_rect)
+    
+    
+    def update_graphics(self, fill_color=None, outline_colors=None, thickness=None):
+        if fill_color is not None:
+            self.fill_color = fill_color
+        if outline_colors is not None:
+            self.outline_colors = outline_colors
+        if thickness is not None:
+            self.thickness = thickness
+        self.dirty = 1
+
+
+class Hexagon:
 
     @staticmethod
     def hex_to_pixel(hex, size, offset_x=0, offset_y=0):
         x = size * (3 / 2 * hex.q)
         y = size * (math.sqrt(3) / 2 * hex.q + math.sqrt(3) * hex.r)
         return Point(x + offset_x + size, y + offset_y + size)
+    
 
     @staticmethod
     def polygon_corners(center, size):
@@ -24,6 +125,7 @@ class Hexagon(object):
             corners.append(Point(x_i, y_i))
         return corners
 
+
     @staticmethod
     def draw_hexagon(surface, center, size, fill_color, outline_colors, thickness):
         corners = Hexagon.polygon_corners(center, size)
@@ -33,6 +135,7 @@ class Hexagon(object):
             start_pos = points[i]
             end_pos = points[(i + 1) % 6]
             pygame.draw.line(surface, outline_colors[i], start_pos, end_pos, thickness[i])
+
 
     @staticmethod
     def side_colours(pos, hexes):
@@ -47,6 +150,7 @@ class Hexagon(object):
                 case 'R':
                     outline_colors.append(kolor.CHOCOLATE)
         return outline_colors
+
 
     @staticmethod
     def side_thickness(pos, hexes):
@@ -65,6 +169,7 @@ class Hexagon(object):
                 case 'b':
                     thickness.append(4)
         return thickness
+
 
     @staticmethod
     def field_colour(pos, hexes):
@@ -105,50 +210,91 @@ class Hexagon(object):
             case 'PO':
                 return kolor.PDARKKHAKI
 
+    
     @staticmethod
-    def draw_map(surface, hex_size, offset_x, offset_y, hexes):
+    def create_hex_graphics_dict(hex_size, camera, visible_hexes_data, map_area):
         
-        q, r, s = 0, 0, 0
-        for i in range(24):
-            for j in range(20):
-                pos = (q, r, s)
-                hex_center = Hex(*pos)
-                pixel = Hexagon.hex_to_pixel(hex_center, hex_size, offset_x, offset_y)
-                fill_color = Hexagon.field_colour(pos, hexes)
-                outline_colors = Hexagon.side_colours(pos, hexes)
-                thickness = Hexagon.side_thickness(pos, hexes)
-                Hexagon.draw_hexagon(surface, pixel, hex_size, fill_color, outline_colors, thickness)
-                q += 2
-                r -= 1
-                s -= 1    
-            q = 0
-            r = i + 1
-            s = -r
+        hex_graphics = {}
 
-        q, r, s = 1, 0, -1
-        for i in range(23):
-            for j in range(19):
-                pos = (q, r, s)
-                hex_center = Hex(*pos)
-                pixel = Hexagon.hex_to_pixel(hex_center, hex_size, offset_x, offset_y)
-                fill_color = Hexagon.field_colour(pos, hexes)
-                outline_colors = Hexagon.side_colours(pos, hexes)
-                thickness = Hexagon.side_thickness(pos, hexes)
-                Hexagon.draw_hexagon(surface, pixel, hex_size, fill_color, outline_colors, thickness)
-                q += 2
-                r -= 1
-                s -= 1
-            q = 1
-            r = i + 1
-            s = -q - r
+        hexes_dict = {pos: data['hex_obj'] for pos, data in visible_hexes_data.items()}
+
+        for pos, hex_data in visible_hexes_data.items():
+            hex_obj = hex_data['hex_obj']
+            pixel_pos = hex_data['pixel_pos']
+            clip_info = hex_data['clip_info']
+
+            fill_color = Hexagon.field_colour(pos, hexes_dict)
+            outline_colors = Hexagon.side_colours(pos, hexes_dict)
+            thickness = Hexagon.side_thickness(pos, hexes_dict)
+
+            hex_graphic = HexGraphic(
+                position=pos,
+                logical_hex=hex_obj,
+                base_center=pixel_pos,
+                base_size=hex_size,
+                fill_color=fill_color,
+                outline_colors=outline_colors,
+                thickness=thickness,
+                map_area=map_area
+            )
+
+            if not clip_info['fully_visible']:
+                hex_graphic = Hexagon.create_clipped_hex_sprite(hex_graphic, clip_info, map_area)
+
+            hex_graphics[pos] = hex_graphic
+
+        return hex_graphics
+
 
     @staticmethod
-    def pixel_to_hex(x, y, size, offset_x=0, offset_y=0):
-        x = x - offset_x - size
-        y = y - offset_y - size
-        q = x / size * 2 / 3
-        r = (((y - size * math.sqrt(3)/2 * q) / math.sqrt(3))) / size 
+    def create_clipped_hex_sprite( hex_sprite, clip_info, map_area):
+      
+        original_surface = hex_sprite.image
+        original_rect = hex_sprite.rect
+        
+        if 'clip_rect' in clip_info:
+            clip_rect = clip_info['clip_rect']
+            
+            surface_clip_left = max(0, clip_rect['left'] - original_rect.left)
+            surface_clip_top = max(0, clip_rect['top'] - original_rect.top)
+            surface_clip_right = min(original_surface.get_width(), 
+                                clip_rect['right'] - original_rect.left)
+            surface_clip_bottom = min(original_surface.get_height(), 
+                                    clip_rect['bottom'] - original_rect.top)
+            
+            clipped_width = int(surface_clip_right - surface_clip_left)
+            clipped_height = int(surface_clip_bottom - surface_clip_top)
+            
+            if clipped_width > 0 and clipped_height > 0:
+                clipped_surface = pygame.Surface((clipped_width, clipped_height), pygame.SRCALPHA)
+                
+                source_rect = pygame.Rect(surface_clip_left, surface_clip_top, 
+                                        clipped_width, clipped_height)
+                clipped_surface.blit(original_surface, (0, 0), source_rect)
+                
+                hex_sprite.image = clipped_surface
+                hex_sprite.rect = pygame.Rect(clip_rect['left'], clip_rect['top'], 
+                                            clipped_width, clipped_height)
+        
+        return hex_sprite
+
+
+    @staticmethod
+    def pixel_to_hex(x, y, base_size, zoom_level, offset_x=0, offset_y=0, zoom_center_x=None, zoom_center_y=None):
+        if zoom_center_x is not None and zoom_center_y is not None:
+            scaled_x = zoom_center_x + (x - zoom_center_x) / zoom_level
+            scaled_y = zoom_center_y + (y - zoom_center_y) / zoom_level
+        else:
+            scaled_x = x / zoom_level
+            scaled_y = y / zoom_level
+        
+        scaled_x = scaled_x - offset_x - base_size
+        scaled_y = scaled_y - offset_y - base_size
+        
+        q = scaled_x / base_size * 2 / 3
+        r = (((scaled_y - base_size * math.sqrt(3)/2 * q) / math.sqrt(3))) / base_size 
         return Hexagon.hex_round(q, r)
+
 
     @staticmethod    
     def hex_round(q, r):
@@ -166,9 +312,4 @@ class Hexagon(object):
         elif r_diff > s_diff:
             r_round = -q_round - s_round
         return Hex(q_round, r_round, s_round)
-
-    @staticmethod
-    def get_clicked_hex(corrected_mouse_position, hex_size, offset_x, offset_y):
-        mouse_x, mouse_y = corrected_mouse_position
-        hex_coords = Hexagon.pixel_to_hex(mouse_x, mouse_y, hex_size, offset_x, offset_y)
-        return (hex_coords.q, hex_coords.r, hex_coords.s)
+   

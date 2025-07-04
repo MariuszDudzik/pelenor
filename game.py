@@ -30,6 +30,9 @@ class Game(object):
     def getPlayerSUnits(self):
         return self.playerS.getUnits()
     
+    def getBoard(self):
+        return self.board
+    
 
     
       

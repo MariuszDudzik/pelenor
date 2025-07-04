@@ -1,16 +1,23 @@
 import pygame
 import kolor
 import support
+import pygame
+import kolor
+import support
+
+import pygame
+import kolor
+import support
 
 class ControlObj(pygame.sprite.DirtySprite):
     def __init__(self, positionX, positionY, width, height, colour, text, 
                  fontStyle, fontSize, fontColour, onClickLeft, onClickRight, 
-                 onScroll4, onScroll5):
+                 onScroll4, onScroll5, onHover=None, onUnhover=None):
         super().__init__()
         self.positionX = positionX
         self.positionY = positionY
-        self.width = width
-        self.height = height
+        self.width = int(width)
+        self.height = int(height)
         self.colour = colour
         self.text = text
         self.fontStyle = fontStyle
@@ -20,47 +27,83 @@ class ControlObj(pygame.sprite.DirtySprite):
         self.onClickRight = onClickRight
         self.onScroll4 = onScroll4 
         self.onScroll5 = onScroll5
+        self.onHover = onHover
+        self.onUnhover = onUnhover
+        self.hovered = False
         self.active = True
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.surface = pygame.Surface((self.width, self.height))
         self.rect = self.image.get_rect(topleft=(self.positionX, self.positionY))
         self.dirty = 1
+        self.visible = 1
+ 
         self._updateImage()
 
 
     def _updateImage(self):
-        self.image.fill(self.colour)
-        if self.text:
-            font = pygame.font.SysFont(self.fontStyle, self.fontSize)
-            label = font.render(self.text, True, self.fontColour)
-            label_rect = label.get_rect(center=(self.width // 2, self.height // 2))
-            self.image.blit(label, label_rect)
+        self.image.fill((0, 0, 0, 0))
+        if self.colour != (0, 0, 0, 0):
+            self.image.fill(self.colour)
+        
+        if self.text and self.fontStyle:
+            try:
+                font = pygame.font.SysFont(self.fontStyle, self.fontSize)
+                label = font.render(str(self.text), True, self.fontColour)
+                label_rect = label.get_rect(center=(self.width // 2, self.height // 2))
+                self.image.blit(label, label_rect)
+            except:
+                font = pygame.font.Font(None, self.fontSize)
+                label = font.render(str(self.text), True, self.fontColour)
+                label_rect = label.get_rect(center=(self.width // 2, self.height // 2))
+                self.image.blit(label, label_rect)
 
 
-    def update(self):
+    def update(self, mousePosition=None):
+        if mousePosition is not None:
+            is_hovering = self.isOverObject(mousePosition)
+            if is_hovering and not self.hovered:
+                self.hovered = True
+                if callable(self.onHover):
+                    self.onHover(self)
+                    self.setDirty()
+            elif not is_hovering and self.hovered:
+                self.hovered = False
+                if callable(self.onUnhover):
+                    self.onUnhover(self)
+                    self.setDirty()
+        
         if self.dirty == 1:
             self._updateImage()
 
 
+    def getSurface(self):
+        return self.surface
+
+    def setDirty(self):
+        self.dirty = 1
+       
+    def changeText(self, text):
+        if self.text != text:
+            self.text = text
+            self.setDirty()
+
+    def changeColour(self, colour):
+        if self.colour != colour:
+            self.colour = colour
+            self.setDirty()
+
     def isOverObject(self, mousePosition):
         return self.rect.collidepoint(mousePosition)
-    
-
-    def changeText(self, text):
-        self.text = text
-
 
     def getText(self):
         return self.text
     
     def setActive(self, active):
         self.active = active
+        self.visible = 1 if active else 0
 
     def getActive(self):
         return self.active
-    
-
-    def changeColour(self, colour):
-        self.colour = colour
 
     def getWidth(self):
         return self.width
@@ -79,19 +122,16 @@ class ControlObj(pygame.sprite.DirtySprite):
     
     def getFontStyle(self): 
         return self.fontStyle
-    
-    def setColour(self, colour):
-        self.colour = colour
-
-    def setDirty(self):
-        self.dirty = 1
 
     def getDirty(self):
         return self.dirty
     
+    def getRect(self):
+        return self.rect
+    
 
     def handle_event(self, mousePosition, event):
-        if self.isOverObject(mousePosition):
+        if self.isOverObject(mousePosition):     
             if event.button == 1: 
                 if self.onClickLeft:
                     self.onClickLeft()
@@ -108,15 +148,15 @@ class ControlObj(pygame.sprite.DirtySprite):
 
 class Label(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
-                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5):
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
-                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
 
 
 class LabelWithScroll(Label):
     def __init__(self, positionX, positionY, width, height, colour, text,
                     fontStyle, fontSize, fontColour, onClickLeft, onClickRight,
-                    onScroll4, onScroll5):
+                    onScroll4, onScroll5, onHover=None, onUnhover=None):
             
         self.sessions = []
         self.scrollOffset = 0
@@ -124,7 +164,7 @@ class LabelWithScroll(Label):
 
         super().__init__(positionX, positionY, width, height, colour, text,
                         fontStyle, fontSize, fontColour, onClickLeft, onClickRight,
-                        onScroll4, onScroll5)
+                        onScroll4, onScroll5, onHover, onUnhover)
 
     def setSessions(self, sessions):
         self.sessions = sessions
@@ -237,10 +277,10 @@ class LabelWithScroll(Label):
 
 class TextBox(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
-                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
-                 activeColor):
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
+                 activeColor=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
-                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
         self.activeColor = activeColor
         self.active = False
 
@@ -251,37 +291,37 @@ class TextBox(ControlObj):
     
 class Button(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
-                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5):
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
-                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
         
         
 class StageGraph(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
-                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
-                 season, nrStage):
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
+                 season=None, nrStage=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
-                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
         self.season = season
         self.nrStage = nrStage
 
 
 class PhazeGraph(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
-                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
-                 nrstage, nrphaze):
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
+                 nrstage=None, nrphaze=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
-                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
         self.nrStage = nrstage
         self.nrPhaze = nrphaze
 
 
 class UnitGraph(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
-                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
-                 unit):
+                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
+                 unit=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
-                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5)
+                fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
         self.unit = unit
 
 
