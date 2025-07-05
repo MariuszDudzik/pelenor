@@ -5,6 +5,7 @@ from collections import defaultdict
 import time
 import server_data_handler
 import struct
+import servercontroller
 
 class GameServer:
     def __init__(self):
@@ -55,8 +56,9 @@ class GameServer:
             case 'create_game':
                 with self.lock:
                     sessionID = self.nextSessionID
-                    player_, board_ = self.messageFromClient.create_game(clientSocket, data)
-                    self.sessions[sessionID] = {'players': [player_], 'plansza': board_}
+                    serverCon = servercontroller.ServerController()
+                    player_, board_ = self.messageFromClient.create_game(clientSocket, data, serverCon)
+                    self.sessions[sessionID] = {'players': [player_], 'plansza': board_, 'handler': serverCon}
                     self.nextSessionID += 1
                     print(f"Sesja {sessionID} utworzona przez {player_.login}.")
                     sessions = self.messageFromClient.openSessionsGame(self.sessions)

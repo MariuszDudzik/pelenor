@@ -64,6 +64,8 @@ def main():
             else:
                 if clear:
                     play_.drawMap(mousePosition)
+                    play_.addReinforcement()
+                    play_.addReinforcementGraphics()
                     clear = False
     
                 play_.render(mousePosition)

@@ -1,5 +1,4 @@
 class Pawn(object):
-    _id_counter = 1
 
     def __init__(self, name = None, nationality = None, type = None, membership = None, 
                  stageDeploy = None, forceHand = None, 
@@ -7,8 +6,7 @@ class Pawn(object):
                  defence = None, defenceR = None, morale = None, moraleR = None, 
                  demoralizationPoint = None, authority = None, authorityR = None, 
                  spellPower = None, movement = None, isRewers = None, QRS = None, graphics = None):
-        self.id = Pawn._id_counter 
-        Pawn._id_counter += 1
+        self.id = 0
         self.name = name
         self.nationality = nationality
         self.unitType = type  #P, J, S, D, N, M (piechota, jazda, mumakil, dowodzca, wódz naczelny, maszyna)

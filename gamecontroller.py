@@ -2,7 +2,7 @@ import platform
 
 class GameController(object):
     def __init__(self):
-        self.inGame = False
+        self.inGame = True
         self.sessionID = None
         self.markedSessionID = None
         self.choosedSite = None
@@ -12,6 +12,7 @@ class GameController(object):
         self.defaultFont = None
         self.aktStage = 0
         self.aktPhaze = 0
+        self.aktplayer = 'C'
         self.deploy = True
         
         self._setDefaultFont()

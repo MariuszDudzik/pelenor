@@ -18,7 +18,11 @@ class ControlObj(pygame.sprite.DirtySprite):
         self.width = int(width)
         self.height = int(height)
         self.colour = colour
+        self.boardColour = kolor.BLACK
+        self.boardThickness = 1
         self.text = text
+        self.wrapped_lines = []
+        self.tiptext = None
         self.fontStyle = fontStyle
         self.fontSize = fontSize
         self.fontColour = fontColour
@@ -38,25 +42,34 @@ class ControlObj(pygame.sprite.DirtySprite):
  
         self._updateImage()
 
-
+    
     def _updateImage(self):
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))
+
         if self.colour != (0, 0, 0, 0):
             self.image.fill(self.colour)
-        
-        if self.text and self.fontStyle:
-            try:
-                font = pygame.font.SysFont(self.fontStyle, self.fontSize)
-                label = font.render(str(self.text), True, self.fontColour)
-                label_rect = label.get_rect(center=(self.width // 2, self.height // 2))
-                self.image.blit(label, label_rect)
-            except:
-                font = pygame.font.Font(None, self.fontSize)
+
+        if self.fontStyle and self.fontSize:
+            font = pygame.font.SysFont(self.fontStyle, self.fontSize)
+
+            if self.wrapped_lines and len(self.wrapped_lines) <= 3:
+                lineHeight = int(self.height * 0.95 / 3)
+                for i, line in enumerate(self.wrapped_lines):
+                    label = font.render(line, True, self.fontColour)
+                    rect = label.get_rect(centerx=self.width // 2, top=1 + i * lineHeight)
+                    self.image.blit(label, rect)
+
+            elif self.text:
                 label = font.render(str(self.text), True, self.fontColour)
                 label_rect = label.get_rect(center=(self.width // 2, self.height // 2))
                 self.image.blit(label, label_rect)
 
-   
+        if isinstance(self, UnitGraph):
+            pygame.draw.rect(self.image, self.boardColour, pygame.Rect(0, 0, self.width, self.height),
+            self.boardThickness)
+    
+
     def update(self, mousePosition=None):
         
         if mousePosition is not None:
@@ -74,7 +87,7 @@ class ControlObj(pygame.sprite.DirtySprite):
         
         if self.dirty == 1:
             self._updateImage()
-    
+
 
     def getSurface(self):
         return self.surface
@@ -85,6 +98,7 @@ class ControlObj(pygame.sprite.DirtySprite):
     def changeText(self, text):
         if self.text != text:
             self.text = text
+            self.wrapped_lines = None
             self.setDirty()
 
     def changeColour(self, colour):
@@ -129,6 +143,12 @@ class ControlObj(pygame.sprite.DirtySprite):
     def getRect(self):
         return self.rect
     
+    def getTipText(self):
+        return self.tiptext
+    
+    def setTipText(self, text):
+        self.tiptext = text
+    
     def setPositionX(self, positionX):
         self.positionX = positionX
         self.rect.topleft = (self.positionX, self.positionY)
@@ -136,8 +156,10 @@ class ControlObj(pygame.sprite.DirtySprite):
     def setPositionY(self, positionY):
         self.positionY = positionY
         self.rect.topleft = (self.positionX, self.positionY)
-    
 
+    def setColour(self, colour):
+            self.colour = colour
+    
     def handle_event(self, mousePosition, event):
         if self.isOverObject(mousePosition):     
             if event.button == 1: 
@@ -331,26 +353,6 @@ class UnitGraph(ControlObj):
         self.unit = unit
 
 
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.colour, (self.positionX, self.positionY, 
-                                            self.width, self.height))
-
-        unit_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        unit_surface.fill(self.colour)
-
-        font = pygame.font.SysFont(self.fontStyle, self.fontSize)
-
-        line = self.text
-        lineHeight = int(self.height * 0.95 / 3)
-
-        for i, tekst in enumerate(line):
-            text_surface = font.render(tekst, True, self.fontColour)
-            rect = text_surface.get_rect(centerx=self.width // 2, top=1 + i * lineHeight)
-            unit_surface.blit(text_surface, rect)
-
-        screen.blit(unit_surface, (self.positionX, self.positionY))
-
-
 class Tooltip(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
                  fontSize, fontColour, onClickLeft=None, onClickRight=None, 
@@ -358,17 +360,16 @@ class Tooltip(ControlObj):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle,
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5,
                 onHover, onUnhover)
-        self.wrapped_lines = []  # Dodaj to
-        
+        self.wrapped_lines = [] 
+     
+
     def _updateImage(self):
-        # Override bazowej metody - nie rób nic jeśli mamy wrapped lines
         if hasattr(self, 'wrapped_lines') and self.wrapped_lines:
-            return  # Nie rób nic, już jest renderowane przez _renderWrappedLines
+            return
         else:
-            # Wywołaj bazową metodę dla normalnego tekstu
             super()._updateImage()
 
-
+    
     def setTextWrapped(self, text, max_line_width):
         self.text = text
         if not self.fontStyle or not self.fontSize:
@@ -395,7 +396,7 @@ class Tooltip(ControlObj):
         for i, line in enumerate(lines):
             text_surface = font.render(line, True, kolor.BLACK)
             self.image.blit(text_surface, (5, 5 + i * (font.get_height() + 5)))
-
+    
 
 
 

@@ -5,13 +5,13 @@ import board
 class MessageFromClient(object):
 
     
-    def create_game(self, clientSocket, data):
+    def create_game(self, clientSocket, data, serverCon):
         login = data.get('login')
         site = data.get('site')              
         name = gamelogic.GameLogic.describeName(site)
         spellPower = gamelogic.GameLogic.describeSpellPower(site)
         player_ = player.Player(name, site, login, spellPower, clientSocket)
-        player_.setUnits(player_.createArmy(site))
+        player_.setUnits(player_.createArmy(site, serverCon))
         player_.shuffle()
         board_ = board.Board()
         return(player_, board_)
@@ -36,7 +36,7 @@ class MessageFromClient(object):
         name = gamelogic.GameLogic.describeName(site)
         spellPower = gamelogic.GameLogic.describeSpellPower(site)
         player_ = player.Player(name, site, login, spellPower, clientSocket)
-        player_.setUnits(player_.createArmy(site))
+        player_.setUnits(player_.createArmy(site, serverSessions[sessionID]['handler']))
         player_.shuffle()
         return player_
     

@@ -20,9 +20,8 @@ class Player(object):
         self.lastPingTime = time.time()
 
 
-      def createArmy(self, site):
+      def createArmy(self, site, serverCon):
         army_dict = {}
-
         for w in dictionary.pawn:
             if site == w[4]:
                 quantity = w[0]
@@ -30,6 +29,7 @@ class Player(object):
                     unit = pawn.Pawn(w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], 
                                     w[10], w[11], w[12], w[13], w[14], w[15], w[16], w[17], 
                                     w[18], w[19], w[20], w[21], w[22])
+                    unit.id = serverCon.getUnitId()
                     army_dict[unit.id] = unit
 
         return army_dict

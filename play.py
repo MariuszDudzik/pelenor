@@ -30,6 +30,7 @@ class Play(object):
         self.manageGraphics = pygame.sprite.LayeredDirty()
         self.stagePhazeGraphics = pygame.sprite.LayeredDirty()
         self.toolTipGraphics = pygame.sprite.LayeredDirty()
+        self.unitGraphics = pygame.sprite.LayeredDirty()
         self.mouse_dragging = False
         self.last_mouse_pos = None 
 
@@ -108,7 +109,7 @@ class Play(object):
         self.camera.setMinX(-0.066 * self.screen.get_height() * 44)
         self.camera.setMinY(-0.066 * self.screen.get_height() * 31)
         self.toolTip.dirty = 0
-
+        
 
     def setHexBaseSize(self):
         self.hex_size = self.screen.get_height() * (0.017 + self.camera.getCameraScale() * self.camera.getZoomSpeed())
@@ -138,8 +139,12 @@ class Play(object):
         for sprite in self.phazeFields:
             self.stagePhazeGraphics.add(sprite, layer=3)
         self.toolTipGraphics.add(self.toolTip, layer=5)
-  
 
+
+    def addReinforcementGraphics(self):
+        self.leftMenuGraphics.add(*self.reinforcement.values(), layer=4)
+
+  
     def _initStageAndPhazeFields(self):
         stages = self.game.getStagesList()
         phazes = self.game.getPhazesList()
@@ -149,7 +154,9 @@ class Play(object):
         stageheight = int(height / 24)
         phazewidth = (width - 6) // 9
         phazeheight = conStageHeight * 0.96 // 2
-
+        maxlinewidth = self.screen.get_width() * 0.1
+        tooltipX = self.screen.get_width() - self.stateField.getWidth() - maxlinewidth - 10
+       
         self.stageFields.clear()
         self.phazeFields.clear()
 
@@ -161,7 +168,7 @@ class Play(object):
                 width - 6,
                 conStageHeight,
                 stage.getColour(),
-                text,
+                "",
                 None,
                 int(height * 0.035),
                 kolor.WHITE,
@@ -169,11 +176,12 @@ class Play(object):
                 None,
                 None,
                 None,
-                partial(play_handler.ToolTipHandler.onHover, get_toolTip=self.getToolTip, screen_width=self.screen.get_width(), state_field_width=self.stateField.getWidth()),
+                partial(play_handler.ToolTipHandler.onHover, get_toolTip=self.getToolTip, toolX=tooltipX, toolY=stageheight, max_line_width=maxlinewidth),
                 partial(play_handler.ToolTipHandler.unHover, play_obj=self),
                 stage,
-               
+
             )
+            stageField.tiptext = text
             self.stageFields.append(stageField)
             stageheight += conStageHeight + 2
 
@@ -188,7 +196,7 @@ class Play(object):
                 phazewidth,
                 phazeheight,
                 phaze.getColour(),
-                text,
+                "",
                 None,
                 int(height * 0.035),
                 kolor.BLACK,
@@ -196,14 +204,81 @@ class Play(object):
                 None,
                 None,
                 None,
-                partial(play_handler.ToolTipHandler.onHover, get_toolTip=self.getToolTip, screen_width=self.screen.get_width(), state_field_width=self.stateField.getWidth()),
+                partial(play_handler.ToolTipHandler.onHover, get_toolTip=self.getToolTip, toolX=tooltipX, toolY=stageheight, max_line_width=maxlinewidth),
                 partial(play_handler.ToolTipHandler.unHover, play_obj=self),
                 phaze,
             )
+            phazeField.tiptext = text
             self.phazeFields.append(phazeField)
             if i % 8 == 0:
                 i = 0
                 stageheight += conStageHeight + 2
+
+
+    """
+    def checkReinforcement(self):
+        if self.gameController.getDeploy():
+            self.addReinforcement()
+    """
+
+    def addReinforcement(self):
+        maxlinewidth = self.screen.get_width() * 0.08
+        tooltipX = self.playerWfield.getPositionX() + 5
+        unitW = self.game.getPlayerWUnits()
+        unitS = self.game.getPlayerSUnits()
+
+        width = (self.playerWfield.getWidth() - 15) // 4
+        height = width
+        margin = 3 
+        quantityInRow = int(self.playerWfield.getWidth() // (width + margin))
+
+        self.reinforcement = {}
+
+        inRow = 0
+        column = 0
+    
+        for unit in unitW.values():
+            if unit.getStageDeploy() <= self.gameController.getAktStage():
+                if inRow <= quantityInRow:
+                    
+                    positionX = self.playerWfield.getPositionX() + 3 + (width + margin) * inRow
+                    positionY = self.playerWphoto.getPositionY() + self.playerWphoto.getHeight() + 3 + (height + margin) * column
+                    unitG = control_obj.UnitGraph(
+                        positionX, positionY, width, height, kolor.LIME,"",self.gameController.getDefaultFont(),
+                        int(height * 0.90 / 3), kolor.BLACK, None, None, None, None, 
+                        partial(play_handler.ToolTipHandler.onHoverReinforcement, get_toolTip=self.getToolTip, toolX=tooltipX, toolY=positionY - 75, max_line_width=maxlinewidth), 
+                        partial(play_handler.ToolTipHandler.unHoverReinforcement, play_obj=self), unit)
+                    unitG.wrapped_lines = gamelogic.GameLogic.unitFullString(unit, self.gameController.getChoosedSite())
+
+                    text = f"{gamelogic.GameLogic.changePotName(unit, self.gameController.getSite())}\n {unit.nationality}\n {unitG.wrapped_lines[2]}"
+                    unitG.setTipText(text)
+                    self.reinforcement[unit.id] = unitG
+                    inRow += 1
+                    if inRow == quantityInRow:
+                        inRow = 0
+                        column += 1
+
+        inRow = 0
+        column = 0
+    
+        for unit in unitS.values():
+            if unit.getStageDeploy() <= self.gameController.getAktStage():
+                if inRow <= quantityInRow:
+                    positionX = self.playerWfield.getPositionX() + 3 + (width + margin) * inRow
+                    positionY = self.playerSphoto.getPositionY() + self.playerSphoto.getHeight() + 3 + (height + margin) * column
+                    unitG = control_obj.UnitGraph(
+                        positionX, positionY, width, height, kolor.REDJ,"", self.gameController.getDefaultFont(),
+                        int(height * 0.90 / 3), kolor.BLACK, None, None, None, None,
+                        partial(play_handler.ToolTipHandler.onHoverReinforcement, get_toolTip=self.getToolTip, toolX=tooltipX, toolY=positionY - 85, max_line_width=maxlinewidth), 
+                        partial(play_handler.ToolTipHandler.unHoverReinforcement, play_obj=self), unit)
+                    unitG.wrapped_lines = gamelogic.GameLogic.unitFullString(unit, self.gameController.getChoosedSite())
+                    text = f"{unit.name}\n {unit.nationality}\n {unitG.wrapped_lines[2]}"
+                    unitG.setTipText(text)
+                    self.reinforcement[unit.id] = unitG
+                    inRow += 1
+                    if inRow == quantityInRow:
+                        inRow = 0
+                        column += 1
 
 
     def setAllDirty(self):
@@ -265,6 +340,7 @@ class Play(object):
 
         if all_dirty_rects:
             pygame.display.update(all_dirty_rects)
+
 
 
     def getCamera(self):

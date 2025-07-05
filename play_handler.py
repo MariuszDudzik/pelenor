@@ -32,17 +32,15 @@ class ZoomHandler(object):
 
 
 class ToolTipHandler(object):
-    
+
     @staticmethod
-    def onHover(button, get_toolTip, screen_width, state_field_width):
-        height = button.getPositionY()
-        max_line_width = screen_width * 0.1
+    def onHover(button, get_toolTip, toolX, toolY, max_line_width):
         toolTip = get_toolTip()
-        toolTip.setPositionX(screen_width - state_field_width - max_line_width - 10)
-        toolTip.setPositionY(height)
-        text = button.getText()
+        toolTip.setPositionX(toolX)
+        toolTip.setPositionY(toolY)
+        text = button.getTipText()
         toolTip.setTextWrapped(text, max_line_width)
-       
+
 
     @staticmethod
     def unHover(button, play_obj):
@@ -52,5 +50,25 @@ class ToolTipHandler(object):
   
         """
         dodac odzwiezazznie wojska jak bedzie gotowe"""
+
+
+    @staticmethod
+    def onHoverReinforcement(button, get_toolTip, toolX, toolY, max_line_width):
+        if button.unit.getSite() == 'Z':
+            button.setColour(kolor.RLIME)
+        elif button.unit.getSite() == 'C':
+            button.setColour(kolor.RREDJ)
+        ToolTipHandler.onHover(button, get_toolTip, toolX, toolY, max_line_width)
+
+
+    @staticmethod
+    def unHoverReinforcement(button, play_obj):
+        if button.unit.getSite() == 'Z':
+            button.setColour(kolor.LIME)
+        elif button.unit.getSite() == 'C':
+            button.setColour(kolor.REDJ)
+        for sprite in play_obj.leftMenuGraphics.sprites():
+            sprite.setDirty()
+      
        
        
