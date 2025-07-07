@@ -6,6 +6,7 @@ import time
 import server_data_handler
 import struct
 import servercontroller
+import gamelogic
 
 class GameServer:
     def __init__(self):
@@ -77,6 +78,7 @@ class GameServer:
                     else:
                         player_ = self.messageFromClient.prepareSecondPlayer(clientSocket, data, self.sessions)
                         self.sessions[sessionID]['players'].append(player_)
+                        gamelogic.GameLogic.S_deploy_palace_gward(self.sessions[sessionID]['plansza'], self.sessions[sessionID]['players'])
                         print(f"Gracz {player_.login} dołączył do sesji {sessionID}.")
                         self._sendJson(clientSocket, {'action': 'joined_game', 'sessionID': sessionID})       
                         parcel = self.messageFromClient.startGame(self.sessions[sessionID]['players'], 

@@ -105,6 +105,13 @@ class HexGraphic(DirtySprite):
             self.thickness = thickness
         self.dirty = 1
 
+    
+    def getCurrentCenter(self):
+        return self.current_center
+    
+    def getCurrentSize(self):
+        return self.current_size
+
 
 class Hexagon:
 

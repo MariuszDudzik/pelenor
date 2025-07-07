@@ -6,6 +6,7 @@ import play
 import client
 import gamecontroller
 import eventbus
+import play_handler
 
 def main():
     pygame.init()
@@ -63,10 +64,14 @@ def main():
                     connection_.setAction(None)
             else:
                 if clear:
-                    play_.drawMap(mousePosition)
                     play_.addReinforcement()
                     play_.addReinforcementGraphics()
-                    clear = False
+                    play_handler.Refresh.refreshLogin(play_)
+                    for unit in game_.playerW.units.values():
+                        if unit.QRS != None:
+                            play_.addUnit('Z', unit.id, unit.QRS)
+                            break
+                    clear = False                    
     
                 play_.render(mousePosition)
                 play_.updateMovement(key)

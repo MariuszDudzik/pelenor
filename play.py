@@ -24,13 +24,11 @@ class Play(object):
         self.units = {}
         self.reinforcement = {}
         self.leftMenuGraphics = pygame.sprite.LayeredDirty()
-        self.mapGraphics = pygame.sprite.LayeredDirty()
         self.rightMenuGraphics = pygame.sprite.LayeredDirty()
-        self.allHexGraphics = pygame.sprite.LayeredDirty()
+        self.mapView = pygame.sprite.LayeredDirty()
         self.manageGraphics = pygame.sprite.LayeredDirty()
         self.stagePhazeGraphics = pygame.sprite.LayeredDirty()
         self.toolTipGraphics = pygame.sprite.LayeredDirty()
-        self.unitGraphics = pygame.sprite.LayeredDirty()
         self.mouse_dragging = False
         self.last_mouse_pos = None 
 
@@ -105,7 +103,7 @@ class Play(object):
         
         self._initStageAndPhazeFields()
         self._prepareGraphics()
-        self.setHexes()
+        self.setMapView()
         self.camera.setMinX(-0.066 * self.screen.get_height() * 44)
         self.camera.setMinY(-0.066 * self.screen.get_height() * 31)
         self.toolTip.dirty = 0
@@ -115,14 +113,20 @@ class Play(object):
         self.hex_size = self.screen.get_height() * (0.017 + self.camera.getCameraScale() * self.camera.getZoomSpeed())
 
 
-    def setHexes(self):
-        self.allHexGraphics.empty()
+    def setMapView(self):
+        self.mapView.empty()
+        self.mapView.add(self.map, layer=1)
         visible_hexes = self.get_visible_hexagons(self.getMap(), self.getCamera(), self.getHexSize(), self.game.getBoard().getHexes())
         self.hex = hexagon.Hexagon.create_hex_graphics_dict(self.hex_size, self.getCamera(),
                             visible_hexes, self.getMap())
-        self.allHexGraphics.add(*self.hex.values(), layer=3)
-        self.map.setDirty()
-    
+        self.mapView.add(*self.hex.values(), layer=3)
+        for unit in self.game.playerW.getUnits().values():
+            if unit.getQRS() is not None:
+                self.addUnit('Z', unit.id, unit.getQRS())
+        for unit in self.game.playerS.getUnits().values():
+            if unit.getQRS() is not None:
+                self.addUnit('C', unit.id, unit.getQRS())
+        
 
     def _prepareGraphics(self):
         for sprite in [self.playerWfield, self.playerSfield]:
@@ -133,7 +137,6 @@ class Play(object):
         self.rightMenuGraphics.add(self.stateField, layer=1)
         self.manageGraphics.add(self.zoomInButton, self.zoomOutButton, self.diceButton, self.resultField,
                                 self.messageField, self.actionButton, layer=4)
-        self.mapGraphics.add(self.map, layer=1)
         for sprite in self.stageFields:
             self.stagePhazeGraphics.add(sprite, layer=2)
         for sprite in self.phazeFields:
@@ -221,6 +224,38 @@ class Play(object):
             self.addReinforcement()
     """
 
+    def addUnit(self, site, id, qrs):
+        qrs = tuple(qrs)
+        if qrs in self.hex:
+            if site == 'C':
+                units = self.game.getPlayerSUnits()
+                colour = kolor.REDJ
+                self.game.getPlayerSUnits()[id].setDeploy()
+                self.game.getPlayerSUnits()[id].setQRS(qrs)
+            elif site == 'Z':
+                units = self.game.getPlayerWUnits()
+                colour = kolor.LIME
+                self.game.getPlayerWUnits()[id].setDeploy()
+                self.game.getPlayerWUnits()[id].setQRS(qrs)
+            size = self.hex[qrs].getCurrentSize() * 1.3 
+            pos_x = self.hex[qrs].getCurrentCenter()[0] - size / 2
+            pos_y = self.hex[qrs].getCurrentCenter()[1] - size / 2
+            
+
+            unitG = control_obj.UnitGraph(
+                            pos_x, pos_y, size, size, colour,"",self.gameController.getDefaultFont(),
+                            int(size * 0.85 / 3), kolor.BLACK, None, None, None, None, None, None, self.getMap(), 
+                            unit = units[id])
+            unitG.wrapped_lines = gamelogic.GameLogic.unitFullString(units[id], self.gameController.getChoosedSite())
+            text = f"{units[id].name}\n {units[id].nationality}\n {unitG.wrapped_lines[2]}"
+            unitG.setTipText(text)
+            self.units[id] = unitG
+
+            i = len(self.game.getBoard().getHexes()[qrs].pawnList)
+            self.game.getBoard().getHexes()[qrs].pawnList.append(id)
+            self.mapView.add(unitG, layer=10 + i)
+
+
     def addReinforcement(self):
         maxlinewidth = self.screen.get_width() * 0.08
         tooltipX = self.playerWfield.getPositionX() + 5
@@ -238,16 +273,16 @@ class Play(object):
         column = 0
     
         for unit in unitW.values():
-            if unit.getStageDeploy() <= self.gameController.getAktStage():
+            if unit.getStageDeploy() <= self.gameController.getAktStage() and unit.getDeploy() == False:
                 if inRow <= quantityInRow:
                     
                     positionX = self.playerWfield.getPositionX() + 3 + (width + margin) * inRow
                     positionY = self.playerWphoto.getPositionY() + self.playerWphoto.getHeight() + 3 + (height + margin) * column
                     unitG = control_obj.UnitGraph(
                         positionX, positionY, width, height, kolor.LIME,"",self.gameController.getDefaultFont(),
-                        int(height * 0.90 / 3), kolor.BLACK, None, None, None, None, 
+                        int(height * 0.85 / 3), kolor.BLACK, None, None, None, None, 
                         partial(play_handler.ToolTipHandler.onHoverReinforcement, get_toolTip=self.getToolTip, toolX=tooltipX, toolY=positionY - 75, max_line_width=maxlinewidth), 
-                        partial(play_handler.ToolTipHandler.unHoverReinforcement, play_obj=self), unit)
+                        partial(play_handler.ToolTipHandler.unHoverReinforcement, play_obj=self), None, unit)
                     unitG.wrapped_lines = gamelogic.GameLogic.unitFullString(unit, self.gameController.getChoosedSite())
 
                     text = f"{gamelogic.GameLogic.changePotName(unit, self.gameController.getSite())}\n {unit.nationality}\n {unitG.wrapped_lines[2]}"
@@ -262,15 +297,15 @@ class Play(object):
         column = 0
     
         for unit in unitS.values():
-            if unit.getStageDeploy() <= self.gameController.getAktStage():
+            if unit.getStageDeploy() <= self.gameController.getAktStage() and unit.getDeploy() == False:
                 if inRow <= quantityInRow:
                     positionX = self.playerWfield.getPositionX() + 3 + (width + margin) * inRow
                     positionY = self.playerSphoto.getPositionY() + self.playerSphoto.getHeight() + 3 + (height + margin) * column
                     unitG = control_obj.UnitGraph(
                         positionX, positionY, width, height, kolor.REDJ,"", self.gameController.getDefaultFont(),
-                        int(height * 0.90 / 3), kolor.BLACK, None, None, None, None,
+                        int(height * 0.85 / 3), kolor.BLACK, None, None, None, None,
                         partial(play_handler.ToolTipHandler.onHoverReinforcement, get_toolTip=self.getToolTip, toolX=tooltipX, toolY=positionY - 85, max_line_width=maxlinewidth), 
-                        partial(play_handler.ToolTipHandler.unHoverReinforcement, play_obj=self), unit)
+                        partial(play_handler.ToolTipHandler.unHoverReinforcement, play_obj=self), None, unit)
                     unitG.wrapped_lines = gamelogic.GameLogic.unitFullString(unit, self.gameController.getChoosedSite())
                     text = f"{unit.name}\n {unit.nationality}\n {unitG.wrapped_lines[2]}"
                     unitG.setTipText(text)
@@ -284,40 +319,25 @@ class Play(object):
     def setAllDirty(self):
         for sprite in self.leftMenuGraphics:
             sprite.setDirty()
-        for sprite in self.mapGraphics:
-            sprite.setDirty()
         for sprite in self.rightMenuGraphics:
             sprite.setDirty()
-        for sprite in self.allHexGraphics:
+        for sprite in self.mapView:
             sprite.setDirty()
         for sprite in self.manageGraphics:
             sprite.setDirty()
         for sprite in self.stagePhazeGraphics:
             sprite.setDirty()
-
-
-    def drawMap(self, mousePosition):
-        all_dirty_rects = []
-        self.mapGraphics.update(mousePosition)
-        dirty_rects = self.mapGraphics.draw(self.screen.get_screen())
-        all_dirty_rects.extend(dirty_rects)
-        if all_dirty_rects:
-            pygame.display.update(all_dirty_rects)
-
+        
 
     def render(self, mousePosition):
         all_dirty_rects = []
 
-        self.mapGraphics.update(mousePosition)
-        dirty_rects = self.mapGraphics.draw(self.screen.get_screen())
-        all_dirty_rects.extend(dirty_rects)
-
-        self.allHexGraphics.update(mousePosition)
-        for hex_sprite in self.allHexGraphics:
-            if hex_sprite.dirty:
-                hex_sprite.draw(self.screen.get_screen())
-                all_dirty_rects.append(hex_sprite.rect.copy())
-     
+        self.mapView.update(mousePosition)
+        for sprite in self.mapView:
+            if sprite.dirty:
+                sprite.draw(self.screen.get_screen())
+                all_dirty_rects.append(sprite.rect.copy())
+    
         self.leftMenuGraphics.update(mousePosition)
         dirty_rects = self.leftMenuGraphics.draw(self.screen.get_screen())
         all_dirty_rects.extend(dirty_rects)
@@ -342,7 +362,6 @@ class Play(object):
             pygame.display.update(all_dirty_rects)
 
 
-
     def getCamera(self):
         return self.camera
 
@@ -357,6 +376,7 @@ class Play(object):
     
     def getToolTip(self):
         return self.toolTip
+
 
     def get_visible_hexagons(self, map_area, camera, hex_size, hexes):
       
@@ -418,7 +438,7 @@ class Play(object):
         
         return visible_hexes
     
-
+  
     def handleEvent(self, mousePosition, event):
         self.zoomInButton.handle_event(mousePosition, event)
         self.zoomOutButton.handle_event(mousePosition, event)
@@ -448,24 +468,24 @@ class Play(object):
                     if self.camera.getCameraX() < self.camera.getMaxX():
                         cam_x = self.camera.getCameraX() + self.camera.getCameraSpeed()
                         self.camera.setCameraX(cam_x)
-                        self.setHexes()
+                        self.setMapView()
                 else:
                     if self.camera.getCameraX() > self.camera.getMinX():
                         cam_x = self.camera.getCameraX() - self.camera.getCameraSpeed()
                         self.camera.setCameraX(cam_x)
-                        self.setHexes()
+                        self.setMapView()
                         
             if abs(dy) > sensitivity:
                 if dy > 0:
                     if self.camera.getCameraY() < self.camera.getMaxY():
                         cam_y = self.camera.getCameraY() + self.camera.getCameraSpeed()
                         self.camera.setCameraY(cam_y)
-                        self.setHexes()
+                        self.setMapView()
                 else:
                     if self.camera.getCameraY() > self.camera.getMinY():
                         cam_y = self.camera.getCameraY() - self.camera.getCameraSpeed()
                         self.camera.setCameraY(cam_y)
-                        self.setHexes()
+                        self.setMapView()
             
             self.last_mouse_pos = mousePosition
 
@@ -475,22 +495,22 @@ class Play(object):
             if self.camera.getCameraX() < self.camera.getMaxX():
                 cam_x = self.camera.getCameraX() + self.camera.getCameraSpeed()
                 self.camera.setCameraX(cam_x)
-                self.setHexes()
+                self.setMapView()
         if keys[pygame.K_RIGHT]:
             if self.camera.getCameraX() > self.camera.getMinX():
                 cam_x = self.camera.getCameraX() - self.camera.getCameraSpeed()
                 self.camera.setCameraX(cam_x)
-                self.setHexes()
+                self.setMapView()
         if keys[pygame.K_UP]:
             if self.camera.getCameraY() < self.camera.getMaxY():
                 cam_y = self.camera.getCameraY() + self.camera.getCameraSpeed()
                 self.camera.setCameraY(cam_y)
-                self.setHexes()
+                self.setMapView()
         if keys[pygame.K_DOWN]:
             if self.camera.getCameraY() > self.camera.getMinY():
                 cam_y = self.camera.getCameraY() - self.camera.getCameraSpeed()
                 self.camera.setCameraY(cam_y)
-                self.setHexes()
+                self.setMapView()
 
      
     def handleKeyboardEvent(self, event):

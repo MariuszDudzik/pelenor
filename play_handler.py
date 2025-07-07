@@ -11,7 +11,7 @@ class ZoomHandler(object):
         if camera.getCameraScale() <= camera.getmaxScale():
             camera.setCameraScale(camera.getCameraScale() + 0.5)
             play_obj.setHexBaseSize()
-            play_obj.setHexes()
+            play_obj.setMapView()
 
     @staticmethod
     def handleOut(get_camera, play_obj):
@@ -19,7 +19,7 @@ class ZoomHandler(object):
         if camera.getCameraScale() > camera.getminScale():
             camera.setCameraScale(camera.getCameraScale() - 0.5)
             play_obj.setHexBaseSize()
-            play_obj.setHexes()
+            play_obj.setMapView()
 
 
     @staticmethod
@@ -47,9 +47,8 @@ class ToolTipHandler(object):
         play_obj.map.setDirty()
         for hex_obj in play_obj.hex.values():
             hex_obj.setDirty()
-  
-        """
-        dodac odzwiezazznie wojska jak bedzie gotowe"""
+        for unit in play_obj.units.values():
+            unit.setDirty()
 
 
     @staticmethod
@@ -69,6 +68,18 @@ class ToolTipHandler(object):
             button.setColour(kolor.REDJ)
         for sprite in play_obj.leftMenuGraphics.sprites():
             sprite.setDirty()
+
+
+class Refresh(object):
+
+    @staticmethod
+    def refreshLogin(play_obj):
+        play_obj.playerWlogin.setText(play_obj.game.playerW.login)
+        play_obj.playerSlogin.setText(play_obj.game.playerS.login)
+        play_obj.playerWlogin.setDirty()
+        play_obj.playerSlogin.setDirty()
+    
+   
       
        
        

@@ -89,6 +89,15 @@ class ControlObj(pygame.sprite.DirtySprite):
             self._updateImage()
 
 
+    #stosowane tylko w przypadku recznego rysowania
+    def draw(self, surface):
+        if self.dirty == 0:
+            return
+
+        surface.blit(self.image, self.rect)
+        self.dirty = 0
+
+
     def getSurface(self):
         return self.surface
 
@@ -159,6 +168,9 @@ class ControlObj(pygame.sprite.DirtySprite):
 
     def setColour(self, colour):
             self.colour = colour
+
+    def setText(self, text):
+        self.text = text
     
     def handle_event(self, mousePosition, event):
         if self.isOverObject(mousePosition):     
@@ -347,10 +359,44 @@ class PhazeGraph(ControlObj):
 class UnitGraph(ControlObj):
     def __init__(self, positionX, positionY, width, height, colour, text, fontStyle, 
                  fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None,
-                 unit=None):
+                map_area=None, unit=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
         self.unit = unit
+        self.map_area = map_area
+
+
+    def is_visible_in_map_area(self, margin=10):
+        if self.map_area is None:
+            return True
+
+        unit_rect = pygame.Rect(
+            self.positionX - margin,
+            self.positionY - margin,
+            self.width + 2 * margin,
+            self.height + 2 * margin
+        )
+
+        return self.map_area.getRect().colliderect(unit_rect)
+
+
+    def draw(self, surface):
+        if not self.dirty:
+            return
+        
+        if self.map_area is not None and not self.is_visible_in_map_area():
+            return
+        
+        old_clip = surface.get_clip()
+   
+        if self.map_area is not None:
+            surface.set_clip(self.map_area.getRect())
+        
+        surface.blit(self.image, self.rect)
+        
+        surface.set_clip(old_clip)
+        
+        self.dirty = 0
 
 
 class Tooltip(ControlObj):

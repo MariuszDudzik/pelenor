@@ -130,3 +130,15 @@ class Pawn(object):
     
     def getSite(self):
         return self.membership
+    
+    def getDeploy(self):
+        return self.deploy
+    
+    def setDeploy(self):
+        self.deploy = True
+
+    def setQRS(self, QRS):
+        self.QRS = QRS
+
+    def getQRS(self):
+        return self.QRS

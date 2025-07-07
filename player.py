@@ -110,3 +110,4 @@ class Player(object):
       
       def setHeads(self, heads):
         self.heads = heads
+

@@ -16,7 +16,6 @@ class GameLogic(object):
         
     @staticmethod
     def unitStats(unit):
-        """Funkcja pomocnicza do generowania stringa ze statystykami jednostki."""
         if unit.unitType in ['P', 'J', 'S']:
             if unit.rewers == False:
                 force = str(unit.forceHand or '')
@@ -63,3 +62,16 @@ class GameLogic(object):
             if name == "Kocioł makieta":
                 name = "Kocioł"
         return name
+    
+
+    @staticmethod
+    def S_deploy_palace_gward(board, players):
+        for player in players:
+            for unit in player.units.values():
+                if unit.QRS != None:
+                    qrs = unit.QRS
+                    id = unit.id
+                    unit.setDeploy()
+                    board.hexes[qrs].pawnList.append(id)
+                
+
