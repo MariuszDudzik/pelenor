@@ -240,21 +240,63 @@ class Play(object):
             size = self.hex[qrs].getCurrentSize() * 1.3 
             pos_x = self.hex[qrs].getCurrentCenter()[0] - size / 2
             pos_y = self.hex[qrs].getCurrentCenter()[1] - size / 2
-            
+            layernr = 10
+            if len(self.game.getBoard().getHexes()[qrs].pawnList) > 0:
+                self.game.getBoard().getHexes()[qrs].pawnList.append(id)
+                self.game.getBoard().getHexes()[qrs].pawnGraphList.append(id)
+                index = self.game.getBoard().getHexes()[qrs].pawnGraphList.index(id)
+                layernr += index
+                index = index * 2
+                pos_x += index
+                pos_y += index
 
+            maxlinewidth = self.screen.get_width() * 0.08    
             unitG = control_obj.UnitGraph(
                             pos_x, pos_y, size, size, colour,"",self.gameController.getDefaultFont(),
-                            int(size * 0.85 / 3), kolor.BLACK, None, None, None, None, None, None, self.getMap(), 
+                            int(size * 0.85 / 3), kolor.BLACK, None, None, None, None, partial(play_handler.ToolTipHandler.onHoverunit, get_toolTip=self.getToolTip, toolX=pos_x, toolY=pos_y - 75, max_line_width=maxlinewidth, play_obj=self), 
+                            partial(play_handler.ToolTipHandler.unHoverunit, play_obj=self), self.getMap(), 
                             unit = units[id])
             unitG.wrapped_lines = gamelogic.GameLogic.unitFullString(units[id], self.gameController.getChoosedSite())
             text = f"{units[id].name}\n {units[id].nationality}\n {unitG.wrapped_lines[2]}"
             unitG.setTipText(text)
             self.units[id] = unitG
 
-            i = len(self.game.getBoard().getHexes()[qrs].pawnList)
-            self.game.getBoard().getHexes()[qrs].pawnList.append(id)
-            self.mapView.add(unitG, layer=10 + i)
+            self.mapView.add(unitG, layer=layernr)
 
+
+    def change_unit_on_hex(self, first_Gunit):
+        qrs = first_Gunit.unit.getQRS()
+        graphList = self.game.getBoard().getHexes()[qrs].pawnGraphList
+        graphList.append(graphList.pop(0))
+        
+        if qrs in self.hex:
+
+            l = len(graphList) - 1
+            self.units[graphList[0]].positionX, self.units[graphList[l]].positionX = self.units[graphList[l]].positionX, self.units[graphList[0]].positionX
+            self.units[graphList[0]].positionY, self.units[graphList[l]].positionY = self.units[graphList[l]].positionY, self.units[graphList[0]].positionY
+            self.units[graphList[0]].rect.x = self.units[graphList[0]].getPositionX()
+            self.units[graphList[0]].rect.y = self.units[graphList[0]].getPositionY()
+            self.units[graphList[l]].rect.x = self.units[graphList[l]].getPositionX()
+            self.units[graphList[l]].rect.y = self.units[graphList[l]].getPositionY()
+            self.units[graphList[0]].setDirty()
+            self.units[graphList[l]].setDirty()
+            for idx, sprite_id in enumerate(graphList):
+                layernr = 10 + idx
+         
+                unit_sprite = self.units[sprite_id]
+                self.mapView.change_layer(unit_sprite, layernr)
+        
+
+                if idx < l:
+                    unit_sprite.setVisible(0)
+        
+            self.units[graphList[l]].setDirty()
+
+            maxlinewidth = self.screen.get_width() * 0.08
+            play_handler.ToolTipHandler.onHoverunit(button=self.units[graphList[l]], get_toolTip=self.getToolTip,
+                                                             toolX=self.units[graphList[l]].getPositionX(), toolY=self.units[graphList[l]].getPositionY() - 75, max_line_width=maxlinewidth, play_obj=self)
+            
+  
 
     def addReinforcement(self):
         maxlinewidth = self.screen.get_width() * 0.08
@@ -319,16 +361,20 @@ class Play(object):
     def setAllDirty(self):
         for sprite in self.leftMenuGraphics:
             sprite.setDirty()
-        for sprite in self.rightMenuGraphics:
-            sprite.setDirty()
+        self.setRightMenuDirty()
         for sprite in self.mapView:
             sprite.setDirty()
-        for sprite in self.manageGraphics:
-            sprite.setDirty()
-        for sprite in self.stagePhazeGraphics:
-            sprite.setDirty()
-        
+    
 
+    def setRightMenuDirty(self):
+        for sprite in self.rightMenuGraphics.sprites():
+            sprite.setDirty()
+        for sprite in self.manageGraphics.sprites():
+            sprite.setDirty()
+        for sprite in self.stagePhazeGraphics.sprites():
+            sprite.setDirty()
+
+    
     def render(self, mousePosition):
         all_dirty_rects = []
 
@@ -496,25 +542,40 @@ class Play(object):
                 cam_x = self.camera.getCameraX() + self.camera.getCameraSpeed()
                 self.camera.setCameraX(cam_x)
                 self.setMapView()
+                play_handler.Refresh.refreshRight(play_obj=self)
         if keys[pygame.K_RIGHT]:
             if self.camera.getCameraX() > self.camera.getMinX():
                 cam_x = self.camera.getCameraX() - self.camera.getCameraSpeed()
                 self.camera.setCameraX(cam_x)
                 self.setMapView()
+                play_handler.Refresh.refreshRight(play_obj=self)
         if keys[pygame.K_UP]:
             if self.camera.getCameraY() < self.camera.getMaxY():
                 cam_y = self.camera.getCameraY() + self.camera.getCameraSpeed()
                 self.camera.setCameraY(cam_y)
                 self.setMapView()
+                play_handler.Refresh.refreshRight(play_obj=self)
         if keys[pygame.K_DOWN]:
             if self.camera.getCameraY() > self.camera.getMinY():
                 cam_y = self.camera.getCameraY() - self.camera.getCameraSpeed()
                 self.camera.setCameraY(cam_y)
                 self.setMapView()
+                play_handler.Refresh.refreshRight(play_obj=self)
 
      
-    def handleKeyboardEvent(self, event):
+    def handleKeyboardEvent(self, mouseposition, event):
             if event.key == pygame.K_ESCAPE:
                 self.connection.close_connection()
                 pygame.quit()
                 quit()
+            if event.key == pygame.K_c:
+                for qrs, hex_sprite in self.hex.items():
+                    if hex_sprite.rect.collidepoint(mouseposition):
+                        if self.game.getBoard().getHexes()[qrs].pawnGraphList:
+                            
+                            first_unit_id = self.game.getBoard().getHexes()[qrs].pawnGraphList[0]
+                            unit = self.units[first_unit_id]
+                    
+                            self.change_unit_on_hex(unit)
+
+                        break

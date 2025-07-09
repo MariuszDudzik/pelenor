@@ -49,7 +49,7 @@ def main():
                     elif event.type == pygame.MOUSEBUTTONUP:
                         play_.handleEvent(mousePosition, event)
                     elif event.type == pygame.KEYDOWN:
-                        play_.handleKeyboardEvent(event)
+                        play_.handleKeyboardEvent(mousePosition, event)
                     elif event.type == pygame.VIDEOEXPOSE or event.type == pygame.ACTIVEEVENT:
                         play_.setAllDirty()
                         screen_ = screen.Screen()
@@ -70,7 +70,7 @@ def main():
                     for unit in game_.playerW.units.values():
                         if unit.QRS != None:
                             play_.addUnit('Z', unit.id, unit.QRS)
-                            break
+                           # break
                     clear = False                    
     
                 play_.render(mousePosition)

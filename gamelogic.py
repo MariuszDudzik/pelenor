@@ -73,5 +73,7 @@ class GameLogic(object):
                     id = unit.id
                     unit.setDeploy()
                     board.hexes[qrs].pawnList.append(id)
+
+    
                 
 

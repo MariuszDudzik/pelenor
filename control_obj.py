@@ -75,15 +75,17 @@ class ControlObj(pygame.sprite.DirtySprite):
         if mousePosition is not None:
             is_hovering = self.isOverObject(mousePosition)
             if is_hovering and not self.hovered:
-                self.hovered = True
-                if callable(self.onHover):
-                    self.onHover(self)
-                    self.setDirty()
+                    self.hovered = True
+                    if callable(self.onHover):
+                        self.onHover(self)
+                        if self.visible == 1:
+                            self.setDirty()
             elif not is_hovering and self.hovered:
-                self.hovered = False
-                if callable(self.onUnhover):
-                    self.onUnhover(self)
-                    self.setDirty()
+                    self.hovered = False
+                    if callable(self.onUnhover):
+                        self.onUnhover(self)
+                        if self.visible == 1:
+                            self.setDirty()
         
         if self.dirty == 1:
             self._updateImage()
@@ -171,6 +173,9 @@ class ControlObj(pygame.sprite.DirtySprite):
 
     def setText(self, text):
         self.text = text
+
+    def setVisible(self, visible):
+        self.visible = visible
     
     def handle_event(self, mousePosition, event):
         if self.isOverObject(mousePosition):     

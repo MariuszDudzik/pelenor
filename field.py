@@ -6,6 +6,7 @@ class Field(object):
                  rimThicknessList = None, movementList = None, TerrainSign = None, 
                  movementPointToSpend = None, defencePoint = None):
         self.pawnList = []
+        self.pawnGraphList = []
         self.QRSList = QRSList
         self.coulor = coulor
         self.rimColourList = rimColourList
