@@ -241,7 +241,7 @@ class Play(object):
                 colour = kolor.LIME
                 self.game.getPlayerWUnits()[id].setDeploy()
                 self.game.getPlayerWUnits()[id].setQRS(qrs)
-            size = self.hex[qrs].getCurrentSize() * 1.3 
+            size = self.hex[qrs].getCurrentSize() * 1.2 
             pos_x = self.hex[qrs].getCurrentCenter()[0] - size / 2
             pos_y = self.hex[qrs].getCurrentCenter()[1] - size / 2
             layernr = 10
