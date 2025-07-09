@@ -79,6 +79,7 @@ class ToolTipHandler(object):
         for idx, id in enumerate(unitList):
             if idx < l:
                 play_obj.units[id].setVisible(0)
+                
             
         if button.unit.getSite() == 'Z':
             button.setColour(kolor.RLIME)

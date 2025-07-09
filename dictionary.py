@@ -958,8 +958,8 @@ pawn = (
 (3, "Katapulta", "Gondor", 'M', 'Z', 0, None, None, 'e', None, 4, None, None, None, None, 36, None, None, None, 2, 'N', None, None, None, None),
 (3, "Kocioł", "Gondor", 'M', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, None, None, None, 0, 'N', None, None, None, None),
 (3, "Kocioł makieta", "Gondor", 'M', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, None, None, None, 0, 'N', None, None, None, None),
-(1, "Gandalf", "Gondor", 'N', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 8, 4, 10, 6, 'T', None, None, None, None),
-(1, "Imrahil", "Gondor", 'D', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 5, 2, None, 6, 'T', None, None, None, None),
+(1, "Gandalf", "Gondor", 'N', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 8, 4, 10, 6, 'T', (18, -7, -11), None, None, None),
+(1, "Imrahil", "Gondor", 'D', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 5, 2, None, 6, 'T', (19, -7, -12), None, None, None),
 (3, "Ciężka jazda", "Rohan", 'J', 'Z', 5, 'B', 'C', None, None, 0, 3, 2, 'W', 'X', 76, None, None, None, 6, 'T', None, None, None, None),
 (7, "Łucznicy konni", "Rohan", 'J', 'Z', 5, 'B', 'C', 'e', 'e', 2, 3, 2, 'X', 'Y', 76, None, None, None, 6, 'T', None, None, None, None),
 (1, "Theoden", "Rohan", 'D', 'Z', 5, None, None, None, None, None, None, None, None, None, 76, 6, 3, None, 6, 'T', None, None, None, None),
@@ -1029,4 +1029,19 @@ ograniczenia_podstawowe_ilosci = {
         'P': ['J', 'S', 'K', 'B', 'P'],
         'D': [],
         'N': []
+}
+
+message = {
+    0: "Sauron - wystawianie oddziałów",
+    1: "Westerneńczyk - wystawianie oddziałów",
+    2: "Sauron - ruch",
+    3: "Westerneńczyk - ruch",
+    4: "Sauron - atak",
+    5: "Westerneńczyk - atak",
+    6: "Sauron - działania wodza",
+    7: "Westerneńczyk - działania wodza",
+    8: "Sauron - oblężenie",
+    10: "Czekaj...",
+    11: "Niepoprawna akcja",
+
 }

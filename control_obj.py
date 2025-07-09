@@ -53,11 +53,19 @@ class ControlObj(pygame.sprite.DirtySprite):
         if self.fontStyle and self.fontSize:
             font = pygame.font.SysFont(self.fontStyle, self.fontSize)
 
-            if self.wrapped_lines and len(self.wrapped_lines) <= 3:
-                lineHeight = int(self.height * 0.95 / 3)
+            
+            if self.wrapped_lines:
+                if isinstance(self, UnitGraph):
+                    lineHeight = int(self.height * 0.95 / 3)
+                    align_key = "centerx"
+                    align_value = self.width // 2
+                elif isinstance(self, Label):
+                    lineHeight = int(self.height / 5)
+                    align_key = "left"
+                    align_value = 1
                 for i, line in enumerate(self.wrapped_lines):
                     label = font.render(line, True, self.fontColour)
-                    rect = label.get_rect(centerx=self.width // 2, top=1 + i * lineHeight)
+                    rect = label.get_rect(**{align_key: align_value, "top": 1 + i * lineHeight})
                     self.image.blit(label, rect)
 
             elif self.text:
@@ -198,7 +206,7 @@ class Label(ControlObj):
                  fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover=None, onUnhover=None):
         super().__init__(positionX, positionY, width, height, colour, text, fontStyle, 
                 fontSize, fontColour, onClickLeft, onClickRight, onScroll4, onScroll5, onHover, onUnhover)
-
+        
 
 class LabelWithScroll(Label):
     def __init__(self, positionX, positionY, width, height, colour, text,

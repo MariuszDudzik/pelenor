@@ -7,6 +7,8 @@ import play_handler
 import gamelogic
 import hexagon
 from functools import partial # Powoduje, że funkcja x() jest wywoływana bez argumentów
+import dictionary
+import support
 
 class Play(object):
 
@@ -95,7 +97,7 @@ class Play(object):
         self.resultField = control_obj.Label(self.diceButton.getPositionX() + self.diceButton.getWidth() 
                             + (self.stateField.getWidth() // 3 // 3), self.diceButton.getPositionY(),self.stateField.getWidth() // 3, self.stateField.getWidth() // 3, kolor.WHITE,  "",  self.gameController.getDefaultFont(), int(screen.get_height() * 0.03), kolor.BLACK, None, None, None, None, None, None)
         self.messageField = control_obj.Label(self.stateField.getPositionX() + (screen.get_height() * 0.0028),  
-                            self.diceButton.getPositionY() + self.diceButton.getHeight() + 10,  self.stateField.getWidth() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.100, kolor.WHITE, "", self.gameController.getDefaultFont(), int(screen.get_height() * 0.025), kolor.BLACK, None, None, None, None, None, None)
+                            self.diceButton.getPositionY() + self.diceButton.getHeight() + 10,  self.stateField.getWidth() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.100, kolor.WHITE, "", self.gameController.getDefaultFont(), int(screen.get_height() * 0.016), kolor.BLACK, None, None, None, None, None, None)
         self.actionButton = control_obj.Button(self.stateField.getPositionX() + (screen.get_height() * 0.0028), 
                             self.messageField.getPositionY() + self.messageField.getHeight() + 3, self.stateField.getWidth() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.045, kolor.GREY, "", self.gameController.getDefaultFont(), int(screen.get_height() * 0.03),kolor.BLACK, None, None, None, None, None, None)
         self.toolTip = control_obj.Tooltip(0, 0, 0, 0, kolor.WHITE, "", self.gameController.getDefaultFont()
@@ -107,6 +109,8 @@ class Play(object):
         self.camera.setMinX(-0.066 * self.screen.get_height() * 44)
         self.camera.setMinY(-0.066 * self.screen.get_height() * 31)
         self.toolTip.dirty = 0
+        self.messageField.wrapped_lines = support.Wrap.wrap_text(dictionary.message[0],
+                            pygame.font.SysFont(self.messageField.fontStyle, self.messageField.fontSize), int(self.messageField.getWidth() * 0.9))
         
 
     def setHexBaseSize(self):
@@ -262,41 +266,44 @@ class Play(object):
             self.units[id] = unitG
 
             self.mapView.add(unitG, layer=layernr)
-
+     
 
     def change_unit_on_hex(self, first_Gunit):
         qrs = first_Gunit.unit.getQRS()
         graphList = self.game.getBoard().getHexes()[qrs].pawnGraphList
+
+        if len(graphList) <= 1:
+            return
+        
         graphList.append(graphList.pop(0))
         
         if qrs in self.hex:
 
             l = len(graphList) - 1
-            self.units[graphList[0]].positionX, self.units[graphList[l]].positionX = self.units[graphList[l]].positionX, self.units[graphList[0]].positionX
-            self.units[graphList[0]].positionY, self.units[graphList[l]].positionY = self.units[graphList[l]].positionY, self.units[graphList[0]].positionY
-            self.units[graphList[0]].rect.x = self.units[graphList[0]].getPositionX()
-            self.units[graphList[0]].rect.y = self.units[graphList[0]].getPositionY()
-            self.units[graphList[l]].rect.x = self.units[graphList[l]].getPositionX()
-            self.units[graphList[l]].rect.y = self.units[graphList[l]].getPositionY()
-            self.units[graphList[0]].setDirty()
-            self.units[graphList[l]].setDirty()
-            for idx, sprite_id in enumerate(graphList):
+           
+            for idx in range(len(graphList) - 1, -1, -1):
                 layernr = 10 + idx
-         
+                if idx > 0:
+                    self.units[graphList[idx]].positionX, self.units[graphList[idx-1]].positionX = self.units[graphList[idx-1]].positionX, self.units[graphList[idx]].positionX
+                    self.units[graphList[idx]].positionY, self.units[graphList[idx-1]].positionY = self.units[graphList[idx-1]].positionY, self.units[graphList[idx]].positionY
+                    self.units[graphList[idx]].rect.x = self.units[graphList[idx]].getPositionX()
+                    self.units[graphList[idx]].rect.y = self.units[graphList[idx]].getPositionY()
+                    self.units[graphList[idx-1]].rect.x = self.units[graphList[idx-1]].getPositionX()
+                    self.units[graphList[idx-1]].rect.y = self.units[graphList[idx-1]].getPositionY()
+
+                sprite_id = graphList[idx]
                 unit_sprite = self.units[sprite_id]
                 self.mapView.change_layer(unit_sprite, layernr)
         
-
+                self.units[graphList[idx]].setDirty()
                 if idx < l:
                     unit_sprite.setVisible(0)
-        
-            self.units[graphList[l]].setDirty()
+                else:
+                    unit_sprite.setVisible(1)
 
             maxlinewidth = self.screen.get_width() * 0.08
             play_handler.ToolTipHandler.onHoverunit(button=self.units[graphList[l]], get_toolTip=self.getToolTip,
                                                              toolX=self.units[graphList[l]].getPositionX(), toolY=self.units[graphList[l]].getPositionY() - 75, max_line_width=maxlinewidth, play_obj=self)
-            
-  
 
     def addReinforcement(self):
         maxlinewidth = self.screen.get_width() * 0.08
