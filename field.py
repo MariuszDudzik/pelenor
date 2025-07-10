@@ -1,10 +1,11 @@
 import pawn
+import kolor
 
 class Field(object):
 
     def __init__(self, QRSList = None, coulor = None, rimColourList = None, 
                  rimThicknessList = None, movementList = None, TerrainSign = None, 
-                 movementPointToSpend = None, defencePoint = None):
+                 movementPointToSpend = None, defencePoint = None, darkcoulor = None):
         self.pawnList = []
         self.pawnGraphList = []
         self.QRSList = QRSList
@@ -15,6 +16,8 @@ class Field(object):
         self.TerrainSign= TerrainSign #L - las, D - droga itp
         self.movementPointToSpend =movementPointToSpend
         self.defencePoint = defencePoint
+        self.darkcoulor = darkcoulor
+        self.colourFlag = False
 
     def getRimColourList(self):
         return self.rimColourList
@@ -24,6 +27,12 @@ class Field(object):
     
     def getColour(self):
         return self.coulor
+    
+    def getDarkColour(self):
+        return self.darkcoulor
+    
+    def getCoulorFlag(self):
+        return self.colourFlag
     
     def to_dict(self):
         field_dict = {
@@ -36,7 +45,9 @@ class Field(object):
             'movementList': self.movementList,
             'TerrainSign': self.TerrainSign,
             'movementPointToSpend': self.movementPointToSpend,
-            'defencePoint': self.defencePoint
+            'defencePoint': self.defencePoint,
+            'darkcoulor': self.darkcoulor,
+            'colourFlag': self.colourFlag
         }
         return field_dict
     
@@ -51,4 +62,7 @@ class Field(object):
         self.TerrainSign = data.get('TerrainSign')
         self.movementPointToSpend = data.get('movementPointToSpend')
         self.defencePoint = data.get('defencePoint')
+        self.darkcoulor = data.get('darkcoulor')
+        self.colourFlag = data.get('colourFlag')
+
         return self

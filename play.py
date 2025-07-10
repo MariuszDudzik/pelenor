@@ -488,7 +488,6 @@ class Play(object):
                     'pixel_pos': pixel,
                     'clip_info': clip_info
                 }
-        
         return visible_hexes
     
   

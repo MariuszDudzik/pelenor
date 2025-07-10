@@ -67,17 +67,17 @@ class HexGraphic(DirtySprite):
         if self.dirty:
             self._update_image()
 
-    
+    """
     def update_from_logical(self):
         self.fill_color = Hexagon.field_colour(self.position, {self.position: self.logical_hex})
         self.outline_colors = Hexagon.side_colours(self.position, {self.position: self.logical_hex})
         self.thickness = Hexagon.side_thickness(self.position, {self.position: self.logical_hex})
         self.dirty = 1
-    
+    """
    
     def setDirty(self):
         self.dirty = 1
-        self.update_from_logical()
+       # self.update_from_logical()
     
     
     def is_visible_in_map_area(self, margin=20):
@@ -95,7 +95,7 @@ class HexGraphic(DirtySprite):
         
         return self.map_area.getRect().colliderect(hex_rect)
     
-    
+    """
     def update_graphics(self, fill_color=None, outline_colors=None, thickness=None):
         if fill_color is not None:
             self.fill_color = fill_color
@@ -104,7 +104,7 @@ class HexGraphic(DirtySprite):
         if thickness is not None:
             self.thickness = thickness
         self.dirty = 1
-
+    """
     
     def getCurrentCenter(self):
         return self.current_center
@@ -147,77 +147,66 @@ class Hexagon:
     @staticmethod
     def side_colours(pos, hexes):
         outline_colors = []
+        color_map = {
+            'W': kolor.WHITE,
+            'B': kolor.BLACK,
+            'R': kolor.CHOCOLATE
+        }
+
         obj = hexes.get(pos)
         for color in obj.getRimColourList():
-            match color:
-                case 'W':
-                    outline_colors.append(kolor.WHITE)
-                case 'B':
-                    outline_colors.append(kolor.BLACK)
-                case 'R':
-                    outline_colors.append(kolor.CHOCOLATE)
+            outline_colors.append(color_map.get(color))
         return outline_colors
 
 
     @staticmethod
     def side_thickness(pos, hexes):
         thickness = []
+        thickness_map = {
+            'g': 2,
+            'm': 5,
+            's': 3,
+            't': 6,
+            'b': 4
+        }
+
         obj = hexes.get(pos)
         for value in obj.getRimThicknessList():
-            match value:
-                case 'g':
-                    thickness.append(2)
-                case 'm':
-                    thickness.append(5)
-                case 's':
-                    thickness.append(3)
-                case 't':
-                    thickness.append(6)
-                case 'b':
-                    thickness.append(4)
+            thickness.append(thickness_map.get(value))
         return thickness
 
 
     @staticmethod
     def field_colour(pos, hexes):
         obj = hexes.get(pos)
-        match obj.getColour():
-            case 'W':
-                return kolor.BEIGE
-            case 'Y':
-                return kolor.YELLOW
-            case 'G':
-                return kolor.GREEN
-            case 'Z':
-                return kolor.BROWN
-            case 'B':
-                return kolor.BLACK
-            case 'T':
-                return kolor.GREY
-            case 'K':
-                return kolor.DGREY
-            case 'S':
-                return kolor.PERU
-            case 'O':
-                return kolor.DARKKHAKI
-            case 'PG':
-                return kolor.PGREEN
-            case 'PY':
-                return kolor.PYELLOW
-            case 'PZ':
-                return kolor.PBROWN
-            case 'PW':
-                return kolor.PBEIGE
-            case 'PT':
-                return kolor.PGREY
-            case 'PK':
-                return kolor.PDGREY
-            case 'PS':
-                return kolor.PPERU
-            case 'PO':
-                return kolor.PDARKKHAKI
+        if obj.getCoulorFlag():
+            x = obj.getColour()
+        else:
+            x = obj.getDarkColour()
 
-    
+        colour_map = {
+            'W': kolor.BEIGE,
+            'Y': kolor.YELLOW,
+            'G': kolor.GREEN,
+            'Z': kolor.BROWN,
+            'B': kolor.BLACK,
+            'T': kolor.GREY,
+            'K': kolor.DGREY,
+            'S': kolor.PERU,
+            'O': kolor.DARKKHAKI,
+            'PG': kolor.PGREEN,
+            'PY': kolor.PYELLOW,
+            'PZ': kolor.PBROWN,
+            'PW': kolor.PBEIGE,
+            'PT': kolor.PGREY,
+            'PK': kolor.PDGREY,
+            'PS': kolor.PPERU,
+            'PO': kolor.PDARKKHAKI
+        }
+
+        return colour_map.get(x)
+
+                
     @staticmethod
     def create_hex_graphics_dict(hex_size, camera, visible_hexes_data, map_area):
         
@@ -230,21 +219,16 @@ class Hexagon:
             pixel_pos = hex_data['pixel_pos']
             clip_info = hex_data['clip_info']
 
-            fill_color = Hexagon.field_colour(pos, hexes_dict)
-            outline_colors = Hexagon.side_colours(pos, hexes_dict)
-            thickness = Hexagon.side_thickness(pos, hexes_dict)
-
             hex_graphic = HexGraphic(
                 position=pos,
                 logical_hex=hex_obj,
                 base_center=pixel_pos,
                 base_size=hex_size,
-                fill_color=fill_color,
-                outline_colors=outline_colors,
-                thickness=thickness,
+                fill_color=Hexagon.field_colour(pos, hexes_dict),
+                outline_colors=Hexagon.side_colours(pos, hexes_dict),
+                thickness=Hexagon.side_thickness(pos, hexes_dict),
                 map_area=map_area
             )
-
             if not clip_info['fully_visible']:
                 hex_graphic = Hexagon.create_clipped_hex_sprite(hex_graphic, clip_info, map_area)
 
@@ -285,7 +269,7 @@ class Hexagon:
         
         return hex_sprite
 
-
+    """
     @staticmethod
     def pixel_to_hex(x, y, base_size, zoom_level, offset_x=0, offset_y=0, zoom_center_x=None, zoom_center_y=None):
         if zoom_center_x is not None and zoom_center_y is not None:
@@ -301,7 +285,7 @@ class Hexagon:
         q = scaled_x / base_size * 2 / 3
         r = (((scaled_y - base_size * math.sqrt(3)/2 * q) / math.sqrt(3))) / base_size 
         return Hexagon.hex_round(q, r)
-
+    
 
     @staticmethod    
     def hex_round(q, r):
@@ -320,4 +304,4 @@ class Hexagon:
             r_round = -q_round - s_round
         return Hex(q_round, r_round, s_round)
     
-   
+   """
