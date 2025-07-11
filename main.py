@@ -67,6 +67,7 @@ def main():
                     play_.addReinforcement()
                     play_.addReinforcementGraphics()
                     play_handler.Refresh.refreshLogin(play_)
+                    play_handler.PlayHandler.change_hex_colour_handler(play_, False, 'C', 0)
                     for unit in game_.playerW.units.values():
                         if unit.QRS != None:
                             play_.addUnit('Z', unit.id, unit.QRS)

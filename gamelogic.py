@@ -74,6 +74,23 @@ class GameLogic(object):
                     unit.setDeploy()
                     board.hexes[qrs].pawnList.append(id)
 
+
+    @staticmethod
+    def deploy0_right_hex_S(hex):
+        if hex[2] < -19 and hex[1] > 0 and hex[1] - hex[2] > 38:
+            return True
+        return False
     
+
+    @staticmethod
+    def deploy0_right_hex_W(hex):
+        if (hex[0] > 3 and hex[0] < 19 and hex[1] < 8) or (hex[0] > 18 and hex[0] < 33 and hex[2] > -26):
+            return True
+        return False
+    
+    
+    @staticmethod
+    def get_matching_coords(hex_dict, check_func):
+        return [coords for coords in hex_dict if check_func(coords)]
                 
 

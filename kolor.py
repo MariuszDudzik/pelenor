@@ -1,6 +1,7 @@
 dark = 0.80
 light = 1.20
 
+
 # Kolory
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
@@ -18,7 +19,6 @@ PERU = (218, 165, 32)
 DARKKHAKI = (189, 183, 107)
 CHOCOLATE = (160, 82, 45)
 LIME = (50, 205, 50)
-#LIME = (127, 225, 0)
 REDJ = (225, 0, 0)
 
 # przyciemnone (dark = 0.80)
@@ -33,6 +33,31 @@ PDARKKHAKI = (151, 146, 85)
 
 # Rozjaśnione (light = 1.20)
 RGREY = (240, 240, 240)
-# RREDJ = (255, REDJ[1] * light * 2, REDJ[2] * light * 2)
 RREDJ = (255, 69, 0)
 RLIME = (127, 255, 0)
+
+colour_hex = {
+        'W': BEIGE,
+        'Y': YELLOW,
+        'G': GREEN,
+        'Z': BROWN,
+        'B': BLACK,
+        'T': GREY,
+        'K': DGREY,
+        'S': PERU,
+        'O': DARKKHAKI,
+        'PG': PGREEN,
+        'PY': PYELLOW,
+        'PZ': PBROWN,
+        'PW': PBEIGE,
+        'PT': PGREY,
+        'PK': PDGREY,
+        'PS': PPERU,
+        'PO': PDARKKHAKI
+    }
+
+color_side = {
+            'W': WHITE,
+            'B': BLACK,
+            'R': CHOCOLATE
+        }

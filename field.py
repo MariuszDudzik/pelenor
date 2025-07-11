@@ -17,7 +17,7 @@ class Field(object):
         self.movementPointToSpend =movementPointToSpend
         self.defencePoint = defencePoint
         self.darkcoulor = darkcoulor
-        self.colourFlag = False
+        self.colourFlag = True
 
     def getRimColourList(self):
         return self.rimColourList
@@ -33,6 +33,12 @@ class Field(object):
     
     def getCoulorFlag(self):
         return self.colourFlag
+    
+    def getQRS(self):
+        return self.QRSList
+    
+    def setColourFlag(self, flag):
+        self.colourFlag = flag
     
     def to_dict(self):
         field_dict = {

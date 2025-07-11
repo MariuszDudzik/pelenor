@@ -1,6 +1,7 @@
 
 import kolor
 import pygame
+import gamelogic
 
 
 class ZoomHandler(object):
@@ -121,14 +122,20 @@ class Refresh(object):
         if x >= x2:
             play_obj.setRightMenuDirty()
 
+
     @staticmethod
     def refresh_under_tooltip(play_obj):
         tooltip_rect = play_obj.getToolTip().getRect()
         for hit_hex in PlayHandler.get_hexes_under_rect(tooltip_rect, play_obj.hex):
             play_obj.hex[hit_hex].setDirty()
-            for unit in play_obj.game.board.hexes[hit_hex].pawnGraphList:
-                play_obj.units[unit].setDirty()
+            Refresh.refresh_unit_graphics_list(play_obj, hit_hex)
 
+
+    @staticmethod
+    def refresh_unit_graphics_list(play_obj, qrs):
+        for unit in play_obj.game.board.hexes[qrs].pawnGraphList:
+                        play_obj.units[unit].setDirty()
+        
 
 class PlayHandler(object):
 
@@ -143,9 +150,33 @@ class PlayHandler(object):
                     if hex_sprite.rect.collidepoint(x, y):
                         hit_hexes.add(hex_pos)
         return hit_hexes
-   
+    
+
+    @staticmethod
+    def change_hex_colour(play_obj, flag, matching):
+        for qrs in matching:
+            Lhex = play_obj.game.board.hexes[tuple(qrs)]
+            Lhex.setColourFlag(flag)
+            if qrs in play_obj.hex:
+                hex_tile = play_obj.hex[qrs]
+                colour = Lhex.getColour() if flag else Lhex.getDarkColour()
+                hex_tile.setFillColour(kolor.colour_hex.get(colour))
+                hex_tile.setDirty()
+                Refresh.refresh_unit_graphics_list(play_obj, qrs)
 
 
+
+    @staticmethod
+    def change_hex_colour_handler(play_obj, flag, site, stage):
+        
+        if stage == 0 and site == 'C':
+            matching = gamelogic.GameLogic.get_matching_coords(play_obj.game.board.hexes, gamelogic.GameLogic.deploy0_right_hex_S)
+        elif stage == 0 and site == 'Z':
+            matching = gamelogic.GameLogic.get_matching_coords(play_obj.game.board.hexes, gamelogic.GameLogic.deploy0_right_hex_W)
+        else:
+            return
+
+        PlayHandler.change_hex_colour(play_obj, flag, matching)
     
    
       

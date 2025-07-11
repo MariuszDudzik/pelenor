@@ -111,6 +111,9 @@ class HexGraphic(DirtySprite):
     
     def getCurrentSize(self):
         return self.current_size
+    
+    def setFillColour(self, colour):
+        self.fill_color = colour
 
 
 class Hexagon:
@@ -147,15 +150,10 @@ class Hexagon:
     @staticmethod
     def side_colours(pos, hexes):
         outline_colors = []
-        color_map = {
-            'W': kolor.WHITE,
-            'B': kolor.BLACK,
-            'R': kolor.CHOCOLATE
-        }
-
+        
         obj = hexes.get(pos)
         for color in obj.getRimColourList():
-            outline_colors.append(color_map.get(color))
+            outline_colors.append(kolor.color_side.get(color))
         return outline_colors
 
 
@@ -183,28 +181,8 @@ class Hexagon:
             x = obj.getColour()
         else:
             x = obj.getDarkColour()
-
-        colour_map = {
-            'W': kolor.BEIGE,
-            'Y': kolor.YELLOW,
-            'G': kolor.GREEN,
-            'Z': kolor.BROWN,
-            'B': kolor.BLACK,
-            'T': kolor.GREY,
-            'K': kolor.DGREY,
-            'S': kolor.PERU,
-            'O': kolor.DARKKHAKI,
-            'PG': kolor.PGREEN,
-            'PY': kolor.PYELLOW,
-            'PZ': kolor.PBROWN,
-            'PW': kolor.PBEIGE,
-            'PT': kolor.PGREY,
-            'PK': kolor.PDGREY,
-            'PS': kolor.PPERU,
-            'PO': kolor.PDARKKHAKI
-        }
-
-        return colour_map.get(x)
+        
+        return kolor.colour_hex.get(x)
 
                 
     @staticmethod
