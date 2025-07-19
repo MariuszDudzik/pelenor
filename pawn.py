@@ -1,43 +1,44 @@
 class Pawn(object):
 
     def __init__(self, name = None, nationality = None, type = None, membership = None, 
-                 stageDeploy = None, forceHand = None, 
-                 forceHandR = None, forceShot = None, forceShotR = None, shotRange = None, 
-                 defence = None, defenceR = None, morale = None, moraleR = None, 
-                 demoralizationPoint = None, authority = None, authorityR = None, 
-                 spellPower = None, movement = None, isRewers = None, QRS = None, graphics = None):
+                 stage_deploy = None, force_hand = None, 
+                 force_hand_r = None, force_shot = None, force_shot_r = None, shot_range = None, 
+                 defence = None, defence_r = None, morale = None, morale_r = None, 
+                 demoralization_point = None, authority = None, authority_r = None, 
+                 spell_power = None, movement = None, is_rewers = None, qrs = None, graphics = None):
         self.id = 0
         self.name = name
         self.nationality = nationality
-        self.unitType = type  #P, J, S, D, N, M (piechota, jazda, mumakil, dowodzca, wódz naczelny, maszyna)
+        self.unit_type = type  #P, J, S, D, N, M (piechota, jazda, mumakil, dowodzca, wódz naczelny, maszyna)
         self.membership = membership #C, Z (czerowny, zielony)
-        self.stageDeploy = stageDeploy
-        self.forceHand = forceHand  #wartosc od A-E
-        self.forceHandR = forceHandR
-        self.forceShot = forceShot #warosc od a-e
-        self.forceShotR = forceShotR
-        self.shotRange = shotRange
+        self.stage_deploy = stage_deploy
+        self.force_hand = force_hand  #wartosc od A-E
+        self.force_hand_r = force_hand_r
+        self.force_shot = force_shot  #warosc od a-e
+        self.force_shot_r = force_shot_r
+        self.shot_range = shot_range
         self.defence = defence  #wartosc od 4-1
-        self.defenceR = defenceR
+        self.defence_r = defence_r
         self.morale = morale  #wartosc od W-Z
-        self.moraleR = moraleR
-        self.demoralizationPoint = demoralizationPoint
+        self.morale_r = morale_r
+        self.demoralization_point = demoralization_point
         self.authority = authority  #autorytet wodza
-        self.authorityR = authorityR
-        self.spellPower = spellPower  #moc czarów naczelnego wodza
+        self.authority_r = authority_r
+        self.spell_power = spell_power  #moc czarów naczelnego wodza
         self.movement = movement
-        self.isRewers = isRewers #T, N
-        self.QRS = QRS
+        self.akt_movement = movement
+        self.is_rewers = is_rewers #T, N
+        self.qrs = qrs
         self.graphics = graphics
         self.surface = None
-        self.coordinatesXY = None
+        self.coordinates_xy = None
         self.fanatic = False
-        self.demoralizaztion = False
+        self.demoralization = False
         self.rewers = False
         self.distracted = False
-        self.gatherOfdistracted = 0
-        self.makeMove = False
-        self.castSpell = False
+        self.gather_of_distracted = 0
+        self.make_move = False
+        self.cast_spell = False
         self.shot = False
         self.fight = False
         self.siege = False
@@ -49,35 +50,36 @@ class Pawn(object):
             'id': self.id,
             'name': self.name,
             'nationality': self.nationality,
-            'unitType': self.unitType,
+            'unit_type': self.unit_type,
             'membership': self.membership,
-            'stageDeploy': self.stageDeploy,
-            'forceHand': self.forceHand,
-            'forceHandR': self.forceHandR,
-            'forceShot': self.forceShot,
-            'forceShotR': self.forceShotR,
-            'shotRange': self.shotRange,
+            'stage_deploy': self.stage_deploy,
+            'force_hand': self.force_hand,
+            'force_hand_r': self.force_hand_r,
+            'force_shot': self.force_shot,
+            'force_shot_r': self.force_shot_r,
+            'shot_range': self.shot_range,
             'defence': self.defence,
-            'defenceR': self.defenceR,
+            'defence_r': self.defence_r,
             'morale': self.morale,
-            'moraleR': self.moraleR,
-            'demoralizationPoint': self.demoralizationPoint,
+            'morale_r': self.morale_r,
+            'demoralization_point': self.demoralization_point,
             'authority': self.authority,
-            'authorityR': self.authorityR,
-            'spellPower': self.spellPower,
+            'authority_r': self.authority_r,
+            'spell_power': self.spell_power,
             'movement': self.movement,
-            'isRewers': self.isRewers,
-            'QRS': self.QRS,
+            'akt_movement': self.akt_movement,
+            'is_rewers': self.is_rewers,
+            'qrs': self.qrs,
             'graphics': self.graphics,
             'surface': self.surface,
-            'coordinatesXY': self.coordinatesXY,
+            'coordinates_xy': self.coordinates_xy,
             'fanatic': self.fanatic,
-            'demoralizaztion': self.demoralizaztion,
+            'demoralization': self.demoralization,
             'rewers': self.rewers,
             'distracted': self.distracted,
-            'gatherOfdistracted': self.gatherOfdistracted,
-            'makeMove': self.makeMove,
-            'castSpell': self.castSpell,
+            'gather_of_distracted': self.gather_of_distracted,
+            'make_move': self.make_move,
+            'cast_spell': self.cast_spell,
             'shot': self.shot,
             'fight': self.fight,
             'siege': self.siege,
@@ -89,56 +91,66 @@ class Pawn(object):
         self.id = data.get('id')
         self.name = data.get('name')
         self.nationality = data.get('nationality')
-        self.unitType = data.get('unitType')
+        self.unit_type = data.get('unit_type')
         self.membership = data.get('membership')
-        self.stageDeploy = data.get('stageDeploy')
-        self.forceHand = data.get('forceHand')
-        self.forceHandR = data.get('forceHandR')
-        self.forceShot = data.get('forceShot')
-        self.forceShotR = data.get('forceShotR')
-        self.shotRange = data.get('shotRange')
+        self.stage_deploy = data.get('stage_deploy')
+        self.force_hand = data.get('force_hand')
+        self.force_hand_r = data.get('force_hand_r')
+        self.force_shot = data.get('force_shot')
+        self.force_shot_r = data.get('force_shot_r')
+        self.shot_range = data.get('shot_range')
         self.defence = data.get('defence')
-        self.defenceR = data.get('defenceR')
+        self.defence_r = data.get('defence_r')
         self.morale = data.get('morale')
-        self.moraleR = data.get('moraleR')
-        self.demoralizationPoint = data.get('demoralizationPoint')
+        self.morale_r = data.get('morale_r')
+        self.demoralization_point = data.get('demoralization_point')
         self.authority = data.get('authority')
-        self.authorityR = data.get('authorityR')
-        self.spellPower = data.get('spellPower')
+        self.authority_r = data.get('authority_r')
+        self.spell_power = data.get('spell_power')
         self.movement = data.get('movement')
-        self.isRewers = data.get('isRewers')
-        self.QRS = data.get('QRS')
+        self.akt_movement = data.get('akt_movement')
+        self.is_rewers = data.get('is_rewers')
+        self.qrs = data.get('qrs')
         self.graphics = data.get('graphics')
         self.surface = data.get('surface')
-        self.coordinatesXY = data.get('coordinatesXY')
+        self.coordinates_xy = data.get('coordinates_xy')
         self.fanatic = data.get('fanatic', False)
-        self.demoralizaztion = data.get('demoralizaztion', False)
+        self.demoralization = data.get('demoralization', False)
         self.rewers = data.get('rewers', False)
         self.distracted = data.get('distracted', False)
-        self.gatherOfdistracted = data.get('gatherOfdistracted', 0)
-        self.makeMove = data.get('makeMove', False)
-        self.castSpell = data.get('castSpell', False)
+        self.gather_of_distracted = data.get('gather_of_distracted', 0)
+        self.make_move = data.get('make_move', False)
+        self.cast_spell = data.get('cast_spell', False)
         self.shot = data.get('shot', False)
         self.fight = data.get('fight', False)
         self.siege = data.get('siege', False)
         self.deploy = data.get('deploy', False)
         self.tar = data.get('tar', [])
         return self
-    
-    def getStageDeploy(self):
-        return self.stageDeploy
-    
-    def getSite(self):
+
+    def get_stage_deploy(self):
+        return self.stage_deploy
+
+    def get_site(self):
         return self.membership
-    
-    def getDeploy(self):
+
+    def get_deploy(self):
         return self.deploy
-    
-    def setDeploy(self):
+
+    def set_deploy(self):
         self.deploy = True
 
-    def setQRS(self, QRS):
-        self.QRS = QRS
+    def set_qrs(self, qrs):
+        self.qrs = qrs
 
-    def getQRS(self):
-        return self.QRS
+    def get_qrs(self):
+        return self.qrs
+
+    def get_id(self):
+        return self.id
+
+    def get_distracted(self):
+        return self.distracted
+
+    def get_unit_type(self):
+        return self.unit_type

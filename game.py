@@ -6,31 +6,31 @@ import phaze
 class Game(object):
 
     def __init__(self):
-        self.playerW = player.Player('', 'Z', '', 0, None)
-        self.playerS = player.Player('', 'C', '', 0, None)
+        self.player_w = player.Player('', 'Z', '', 0, None)
+        self.player_s = player.Player('', 'C', '', 0, None)
         self.board = board.Board()
-        self.stages = stage.createStage()
-        self.phazes = phaze.createPhaze()
+        self.stages = stage.create_stage()
+        self.phazes = phaze.create_phaze()
 
-    def getStagesList(self):
+    def get_stages_list(self):
         return self.stages
-    
-    def getPhazesList(self):
+
+    def get_phazes_list(self):
         return self.phazes
-    
-    def getPlayerSite(self, login):
-        if login == self.playerW.getLogin():
+
+    def get_player_site(self, login):
+        if login == self.player_w.get_login():
             return 'W'
-        elif login == self.playerS.getLogin():
+        elif login == self.player_s.get_login():
             return 'S'
-        
-    def getPlayerWUnits(self):
-        return self.playerW.getUnits()
-    
-    def getPlayerSUnits(self):
-        return self.playerS.getUnits()
-    
-    def getBoard(self):
+
+    def get_player_w_units(self):
+        return self.player_w.get_units()
+
+    def get_player_s_units(self):
+        return self.player_s.get_units()
+
+    def get_board(self):
         return self.board
     
 

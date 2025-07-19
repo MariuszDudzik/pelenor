@@ -9,7 +9,7 @@ class Board(object):
 
     def _addHex(self):
         for w in dictionary.field: 
-            self.hexes[w[1]] = field.Field(w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], self.setDarkColour(w[2]))
+            self.hexes[w[1]] = field.Field(w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], self.set_dark_colour(w[2]))
                                            
 
     def to_dict(self):
@@ -32,12 +32,12 @@ class Board(object):
         return self
     
 
-    def getHexes(self):
+    def get_hexes(self):
         return self.hexes
     
 
-    def setDarkColour(self, w):
-        colourMap = {
+    def set_dark_colour(self, w):
+        colour_map = {
             'Y': 'PY',
             'G': 'PG',
             'Z': 'PZ',
@@ -48,7 +48,7 @@ class Board(object):
             'O': 'PO',
             'B': 'B'
         }
-        if w in colourMap:
-            return colourMap[w]
+        if w in colour_map:
+            return colour_map[w]
         else:
             return 'B'

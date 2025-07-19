@@ -20,6 +20,9 @@ DARKKHAKI = (189, 183, 107)
 CHOCOLATE = (160, 82, 45)
 LIME = (50, 205, 50)
 REDJ = (225, 0, 0)
+GOLD = (230, 230, 250)
+PURPLE = (148, 0, 211)
+
 
 # przyciemnone (dark = 0.80)
 PGREEN = (122, 163, 40)

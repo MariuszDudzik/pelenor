@@ -953,13 +953,13 @@ pawn = (
 (1, "Jazda", "Gondor", 'J', 'Z', 0, 'B', 'C', None, None, 0, 3, 2, 'X', 'X', 36, None, None, None, 6, 'T', None, None, None, None),
 (1, "Kopijnicy", "Gondor", 'J', 'Z', 0, 'B', 'C', None, None, 0, 3, 2, 'W', 'X', 36, None, None, None, 6, 'T', None, None, None, None),
 (1, "Topornicy", "Gondor", 'P', 'Z', 0, 'B', 'C', None, None, 0, 3, 2, 'X', 'Y', 36, None, None, None, 4, 'T', None, None, None, None),
-(1, "Łucznicy", "Gondor", 'P', 'Z', 0, None, None, 'e', 'e', 2, 2, 3, 'X', 'X', 36, None, None, None, 4, 'T', (18, -7, -11), None, None, None),
+(1, "Łucznicy", "Gondor", 'P', 'Z', 0, None, None, 'e', 'e', 2, 2, 3, 'X', 'X', 36, None, None, None, 4, 'T', None, None, None, None),
 (1, "Gwardia pałacowa", "Gondor", 'P', 'Z', 0, 'D', 'E', None, None, 0, 3, 3, 'W', 'X', 36, None, None, None, 4, 'T', (18, -7, -11), None, None, None),
 (3, "Katapulta", "Gondor", 'M', 'Z', 0, None, None, 'e', None, 4, None, None, None, None, 36, None, None, None, 2, 'N', None, None, None, None),
 (3, "Kocioł", "Gondor", 'M', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, None, None, None, 0, 'N', None, None, None, None),
 (3, "Kocioł makieta", "Gondor", 'M', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, None, None, None, 0, 'N', None, None, None, None),
-(1, "Gandalf", "Gondor", 'N', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 8, 4, 10, 6, 'T', (18, -7, -11), None, None, None),
-(1, "Imrahil", "Gondor", 'D', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 5, 2, None, 6, 'T', (19, -7, -12), None, None, None),
+(1, "Gandalf", "Gondor", 'N', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 8, 4, 10, 6, 'T', None, None, None, None),
+(1, "Imrahil", "Gondor", 'D', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, 5, 2, None, 6, 'T', None, None, None, None),
 (3, "Ciężka jazda", "Rohan", 'J', 'Z', 5, 'B', 'C', None, None, 0, 3, 2, 'W', 'X', 76, None, None, None, 6, 'T', None, None, None, None),
 (7, "Łucznicy konni", "Rohan", 'J', 'Z', 5, 'B', 'C', 'e', 'e', 2, 3, 2, 'X', 'Y', 76, None, None, None, 6, 'T', None, None, None, None),
 (1, "Theoden", "Rohan", 'D', 'Z', 5, None, None, None, None, None, None, None, None, None, 76, 6, 3, None, 6, 'T', None, None, None, None),
@@ -1009,7 +1009,7 @@ stage = {
     16: ("DZIEŃ", ''),
 }
 
-ograniczenia_terenu = {
+terrain_restrictions = {
         'J': ['Z', 'L', 'G'],
         'S': ['Z', 'L', 'G'],
         'M': ['Z', 'L', 'G'],
@@ -1020,7 +1020,7 @@ ograniczenia_terenu = {
         'N': ['G']
     }
 
-ograniczenia_podstawowe_ilosci = {
+basic_quantity_limits = {
         'J': ['J', 'S', 'K', 'B', 'P'],
         'S': ['J', 'S', 'K', 'B', 'P'],
         'M': ['M'],
@@ -1043,5 +1043,6 @@ message = {
     8: "Sauron - oblężenie",
     10: "Czekaj...",
     11: "Niepoprawna akcja",
+    12: "Wystawiono jednostkę"
 
 }

@@ -3,26 +3,25 @@ import kolor
 
 class Stage(object):
     def __init__(self, nr = 0, colour = None, season = None, text = None):
-        self.nrStage = nr
+        self.nr_stage = nr
         self.colour = colour
         self.season = season
         self.text = text
 
-    def getColour(self):
+    def get_colour(self):
         return self.colour
 
-    def getSeason(self):
+    def get_season(self):
         return self.season
 
-    def getText(self):
+    def get_text(self):
         return self.text
-    
-    def getNrStage(self):
-        return self.nrStage
-    
+
+    def get_nr_stage(self):
+        return self.nr_stage
 
 
-def createStage():
+def create_stage():
     list = []
     for i in range(1, 17):
         season = dictionary.stage[i][0]

@@ -1,29 +1,35 @@
 import socket
 import json
 import time
-import message_from_server
-import message_to_server
+import msgFserver
+import msgTServer
 import threading
 import select
 import struct
 
 class Client(object):
-    def __init__(self, gameController, game, eventbus):
-        self.clientSocket = None
-        self.serverAddress = None
+    def __init__(self, game_controller, game, eventbus):
+        self.client_socket = None
+        self.server_address = None
         self.port = None
         self.action = None
-        self.connectionStatus = ""
+        self.connection_status = ""
         self.tping = None
         self.treceive = None
         self.stop_event = threading.Event()
-        self.messageFromServer = message_from_server.MessageFromServer(gameController, game, eventbus)
-        self.messageToServer = message_to_server.MessageToServer(gameController, game)
+        self.msg_f_server = msgFserver.MsgFServer(game_controller, game, eventbus)
+        self.msg_t_server = msgTServer.MsgTServer(game_controller, game)
+        self.play = None
 
-        self._loadServerAddress()
+        self._load_server_address()
 
 
-    def _stopThreads(self):
+    def set_play(self, play):
+        self.play = play
+        self.msg_f_server.set_play(play)
+
+
+    def _stop_threads(self):
         self.stop_event.set()
         if self.tping and self.tping.is_alive():
             self.tping.join()
@@ -31,65 +37,63 @@ class Client(object):
             self.treceive.join()
  
 
-    def _loadServerAddress(self):
+    def _load_server_address(self):
         with open("server.dat", "r") as file:
-            self.serverAddress = file.readline().strip()  
+            self.server_address = file.readline().strip()
             self.port = int(file.readline().strip())
 
 
-    def startConnection(self):
-        server_address = (self.serverAddress, self.port)
+    def start_connection(self):
+        server_address = (self.server_address, self.port)
         try:
-            self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.clientSocket.connect(server_address)
-            self.setConnectionStatus("Połączono z serwerem")
-            self.tping = threading.Thread(target=self.pingServer, daemon=True)
-            self.treceive = threading.Thread(target=self.receiveData, daemon=True)
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client_socket.connect(server_address)
+            self.set_connection_status("Połączono z serwerem")
+            self.tping = threading.Thread(target=self.ping_server, daemon=True)
+            self.treceive = threading.Thread(target=self.receive_data, daemon=True)
             self.tping.start()
             self.treceive.start()
         except Exception as e:
-            self.setConnectionStatus(f"Błąd połączenia: {e}")
-            self.setSocket(None)
+            self.set_connection_status(f"Błąd połączenia: {e}")
+            self.set_socket(None)
 
 
-    def getsocket(self):
-        return self.clientSocket
-    
+    def get_socket(self):
+        return self.client_socket
 
-    def setSocket(self, nowSocket):
-        self.clientSocket = nowSocket
-    
+    def set_socket(self, now_socket):
+        self.client_socket = now_socket
+
 
     def close_connection(self):
-        self._stopThreads()
-        if self.clientSocket:
+        self._stop_threads()
+        if self.client_socket:
             try:
-                self.clientSocket.close()
+                self.client_socket.close()
             except OSError:
                 pass 
             finally:
-                self.setSocket(None)
+                self.set_socket(None)
 
-    
-    def getAction(self):
+
+    def get_action(self):
         return self.action
     
 
-    def setAction(self, action):
+    def set_action(self, action):
         self.action = action
 
-    def getConnectionStatus(self):
-        return self.connectionStatus
-    
-    
-    def setConnectionStatus(self, connectionStatus):
-        self.connectionStatus = connectionStatus
+    def get_connection_status(self):
+        return self.connection_status
+
+    def set_connection_status(self, connection_status):
+        self.connection_status = connection_status
 
 
-    def pingServer(self):
+    def ping_server(self):
         while not self.stop_event.is_set():
             try:
-                self.messageToServer.ping(self.getsocket())
+                self.msg_t_server.ping(self.get_socket())
                 for _ in range(70):
                     if self.stop_event.is_set():
                         return
@@ -99,15 +103,15 @@ class Client(object):
                 return
 
 
-    def receiveData(self):
+    def receive_data(self):
         while not self.stop_event.is_set():
             try:
-                ready, _, _ = select.select([self.clientSocket], [], [], 0.2)
+                ready, _, _ = select.select([self.client_socket], [], [], 0.2)
                 if not ready:
                     continue
                 length_data = b""
                 while len(length_data) < 4:
-                    packet = self.clientSocket.recv(4 - len(length_data))
+                    packet = self.client_socket.recv(4 - len(length_data))
                     if not packet:
                         return
                     length_data += packet
@@ -116,28 +120,28 @@ class Client(object):
 
                 received_data = b""
                 while len(received_data) < response_length:
-                    packet = self.clientSocket.recv(min(4096, response_length - len(received_data)))
+                    packet = self.client_socket.recv(min(4096, response_length - len(received_data)))
                     if not packet:
                         raise ConnectionError("Połączenie zerwane w trakcie odbierania danych.")
                     received_data += packet
 
                 data = json.loads(received_data.decode())
-                self.messageFromServer.serverResponseHandle(data)
+                self.msg_f_server.server_response_handle(data)
 
             except Exception as e:
                 print(f"Błąd odbioru danych: {e}")
                 return
 
 
-    def gameClient(self):
-        action = self.getAction()   
+    def game_client(self):
+        action = self.get_action()
         if action:
             match action:
                 case 'create_game':
-                    self.messageToServer.createGame(self.getsocket())
+                    self.msg_t_server.create_game(self.get_socket())
                 case 'list_sessions':
-                    self.messageToServer.listSessions(self.getsocket())
+                    self.msg_t_server.list_sessions(self.get_socket())
                 case 'join_game':
-                    self.messageToServer.joinGame(self.getsocket())
+                    self.msg_t_server.join_game(self.get_socket())
 
 

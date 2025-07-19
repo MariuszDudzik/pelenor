@@ -13,71 +13,68 @@ def main():
     eventbus_ = eventbus.EventBus()
     screen_ = screen.Screen()
     game_ = game.Game()
-    gameController_ = gamecontroller.GameController()
-    connection_ = client.Client(gameController_, game_, eventbus_)
-    menu_ = menu.Menu(screen_, gameController_, connection_, eventbus_)
-    play_ = play.Play(screen_, gameController_, connection_, game_)
+    game_controller_ = gamecontroller.GameController()
+    connection_ = client.Client(game_controller_, game_, eventbus_)
+    menu_ = menu.Menu(screen_, game_controller_, connection_, eventbus_)
+    play_ = play.Play(screen_, game_controller_, connection_, game_)
+    connection_.set_play(play_)
     clock = pygame.time.Clock()
     screen_.fill_background((0, 0, 0))
   
     try:
-        connection_.startConnection()
+        connection_.start_connection()
         clear = True
         while True:
-            mousePosition = pygame.mouse.get_pos()
+            mouse_position = pygame.mouse.get_pos()
             key = pygame.key.get_pressed()
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    if connection_.getConnectionStatus() == "Connected":
+                    if connection_.get_connection_status() == "Connected":
                         connection_.close_connection()
                     pygame.quit()
                     quit()
-                
-                if gameController_.getInGame():
+
+                if game_controller_.get_in_game():
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        menu_.handleEvent(mousePosition, event)
+                        menu_.handle_event(mouse_position, event)
                     elif event.type == pygame.KEYDOWN:
-                        menu_.handleKeyboardEvent(event)
+                        menu_.handle_keyboard_event(event)
                     elif event.type == pygame.VIDEOEXPOSE or event.type == pygame.ACTIVEEVENT:
-                        menu_.setAllDirty()
+                        menu_.set_all_dirty()
                         screen_ = screen.Screen()
                         screen_.fill_background((0, 0, 0))
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        play_.handleEvent(mousePosition, event)
+                        play_.handle_event(mouse_position, event)
                     elif event.type == pygame.MOUSEBUTTONUP:
-                        play_.handleEvent(mousePosition, event)
+                        play_.handle_event(mouse_position, event)
                     elif event.type == pygame.KEYDOWN:
-                        play_.handleKeyboardEvent(mousePosition, event)
+                        play_.handle_keyboard_event(mouse_position, event)
                     elif event.type == pygame.VIDEOEXPOSE or event.type == pygame.ACTIVEEVENT:
-                        play_.setAllDirty()
+                        play_.set_all_dirty()
                         screen_ = screen.Screen()
                         screen_.fill_background((0, 0, 0))
-                   
-            
-            if gameController_.getInGame():
+
+
+            if game_controller_.get_in_game():
                 menu_.render()
 
-                if connection_.getAction() != None:
-                    connection_.gameClient()
-                    connection_.setAction(None)
+                if connection_.get_action() != None:
+                    connection_.game_client()
+                    connection_.set_action(None)
             else:
                 if clear:
-                    play_.addReinforcement()
-                    play_.addReinforcementGraphics()
-                    play_handler.Refresh.refreshLogin(play_)
+                    play_.add_reinforcement()
+                    play_.add_reinforcement_graphics()
+                    play_handler.Refresh.refresh_login(play_)
                     play_handler.PlayHandler.change_hex_colour_handler(play_, False, 'C', 0)
-                    for unit in game_.playerW.units.values():
-                        if unit.QRS != None:
-                            play_.addUnit('Z', unit.id, unit.QRS)
-                           # break
-                    clear = False                    
-    
-                play_.render(mousePosition)
-                play_.updateMovement(key)
-                play_.handleMouseMotion(mousePosition, event)
-                
+                    clear = False
+
+                play_.render(mouse_position)
+                play_.update_movement(key)
+                play_.handle_mouse_motion(mouse_position, event)
+
             clock.tick(60)
 
     except KeyboardInterrupt:

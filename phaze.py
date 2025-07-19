@@ -2,26 +2,26 @@ import kolor
 import dictionary as dictionary
 
 class Phaze(object):
-    def __init__(self, nrstage = 0, nrphaze = 0, colour = None, name = None):
-        self.nrStage = nrstage
-        self.nrPhaze = nrphaze
+    def __init__(self, nr_stage = 0, nr_phaze = 0, colour = None, name = None):
+        self.nr_stage = nr_stage
+        self.nr_phaze = nr_phaze
         self.colour = colour
         self.name = name
         self.completed = False
 
-    def getColour(self):
+    def get_colour(self):
         return self.colour
-    
-    def getName(self):
-        return self.name
-    
-    def getNrStage(self):
-        return self.nrStage
-    
-    def getNrPhaze(self):
-        return self.nrPhaze
 
-def createPhaze():
+    def get_name(self):
+        return self.name
+
+    def get_nr_stage(self):
+        return self.nr_stage
+
+    def get_nr_phaze(self):
+        return self.nr_phaze
+
+def create_phaze():
     list = []
     for j in range(0, 16):
         for i in range(1, 9):
