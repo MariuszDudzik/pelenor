@@ -36,7 +36,7 @@ class Menu(object):
             kolor.BLACK, "Wpisz login:", game_controller.get_default_font(), int(screen.get_height() * 0.025), kolor.WHITE, None, None, None, None, None, None)
         self.login_text = control_obj.TextBox(screen.get_width() / 2 - screen.get_width() * 0.07, 
             screen.get_height() / 3 - screen.get_height() * 0.15, screen.get_width() * 0.14, screen.get_height() * 0.032, 
-            kolor.GREY, "", game_controller.get_default_font(), int(screen.get_height() * 0.025), kolor.BLACK, self.login_text_active, None, None, None, None, None, kolor.WHITE,)
+            kolor.GREY, "", game_controller.get_default_font(), int(screen.get_height() * 0.025), kolor.BLACK, self.login_text_active, None, None, None, None, None, kolor.BLACK, kolor.WHITE)
         self.session_label = control_obj.LabelWithScroll(screen.get_width() / 2 - screen.get_width() * 0.175, 
             screen.get_height() / 3 + screen.get_height() * 0.18, screen.get_width() * 0.37, screen.get_height() * 0.16, 
             kolor.GREY, "", game_controller.get_default_font(), int(screen.get_height() * 0.025), kolor.BLACK, self.choose_session, None, self.set_scroll_offset_up, self.set_scroll_offset_down, None, None)
@@ -112,14 +112,14 @@ class Menu(object):
                 self.login_text.set_dirty()
 
     def choice_s_button_lc(self, mouse_position=None):
-        self.game_controller.set_site('C')
+        self.game_controller.set_chosen_site('C')
         self.choice_s_button.change_colour(kolor.BLUE)
         self.choice_w_button.change_colour(kolor.DGREY)
         self.choice_s_button.set_dirty()
         self.choice_w_button.set_dirty()
 
     def choice_w_button_lc(self, mouse_position=None):
-        self.game_controller.set_site('Z')
+        self.game_controller.set_chosen_site('Z')
         self.choice_w_button.change_colour(kolor.BLUE)
         self.choice_s_button.change_colour(kolor.DGREY)
         self.choice_w_button.set_dirty()
@@ -127,7 +127,7 @@ class Menu(object):
 
 
     def create_game(self, mouse_position=None):
-        if self.game_controller.get_site() is not None and self.login_text.get_text() != "":
+        if self.game_controller.get_chosen_site() is not None and self.login_text.get_text() != "":
             self.game_controller.set_login(self.login_text.get_text())
             self.connection.set_action('create_game')
 

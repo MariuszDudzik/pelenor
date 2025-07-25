@@ -67,17 +67,6 @@ class GameLogic(object):
     
 
     @staticmethod
-    def s_deploy_palace_gward(board, players):
-        for player in players:
-            for unit in player.units.values():
-                if unit.qrs != None:
-                    qrs = unit.qrs
-                    id = unit.id
-                    unit.set_deploy()
-                    board.hexes[qrs].pawn_list.append(id)
-
-
-    @staticmethod
     def deploy0_right_hex_S(hex):
         if hex[2] < -19 and hex[1] > 0 and hex[1] - hex[2] > 38:
             return True
@@ -107,48 +96,154 @@ class GameLogic(object):
             return GameLogic.deploy0_right_hex_S(qrs)
         elif site == 'Z' and phaze == 0:
             return GameLogic.deploy0_right_hex_W(qrs) 
-        
+
 
     @staticmethod
-    def get_unit_type_for_player_c(player, unit_id, game):
-        if player == 'C':
-            return game.player_s.units[unit_id].get_unit_type()
-        elif player == 'Z':
-            return game.player_w.units[unit_id].get_unit_type()
+    def get_unit_by_id(unit_id, player_1, player_2):
+        for player in [player_1, player_2]:
+            if unit_id in player.get_units():
+                return player.get_units()[unit_id]
         return None
+
+
+    @staticmethod
+    def get_player_by_unit_id(unit_id, player_1, player_2):
+        for player in [player_1, player_2]:
+            if unit_id in player.get_units():
+                return player
+        return None
+
+
+    @staticmethod
+    def get_unit_type_for_player(unit_id, player_1, player_2):
+        unit = GameLogic.get_unit_by_id(unit_id, player_1, player_2)
+        return unit.get_unit_type() if unit else None
+
+
+    @staticmethod
+    def get_unit_nationality_for_player(unit_id, player_1, player_2):
+        unit = GameLogic.get_unit_by_id(unit_id, player_1, player_2)
+        return unit.get_nationality() if unit else None
+
+          
+    @staticmethod
+    def get_unit_site(unit_id, player_1, player_2):
+        unit = GameLogic.get_unit_by_id(unit_id, player_1, player_2)
+        return unit.get_site() if unit else None
+      
+            
+    @staticmethod
+    def get_unit_distracted(unit_id, player_1, player_2):
+        unit = GameLogic.get_unit_by_id(unit_id, player_1, player_2)
+        return unit.get_distracted() if unit else None
+
+
+    @staticmethod
+    def get_units_for_player(site, player_1, player_2):
+        for player in [player_1, player_2]:
+            if player.get_site() == site:
+                return player.get_units()
+
+
+    @staticmethod
+    def get_unit_qrs(unit_id, player_1, player_2):
+        unit = GameLogic.get_unit_by_id(unit_id, player_1, player_2)
+        return unit.get_qrs() if unit else None
+
+
+    @staticmethod
+    def get_unit_name(unit_id, player_1, player_2):
+        unit = GameLogic.get_unit_by_id(unit_id, player_1, player_2)
+        return unit.get_name() if unit else None
+            
+
+    @staticmethod
+    def is_friendly_hex(hex_unit_id, site, player_1, player_2):
+        return GameLogic.get_unit_site(hex_unit_id, player_1, player_2) == site
     
 
     @staticmethod
-    def get_unit_type_for_player_s(site, unit_id, players):
-        for player in players:
-            if site == player.get_site():
-                return player.units[unit_id].get_unit_type()
+    def check_friends_for_n(pawns, player_1, player_2):
+        for pawn_id in pawns:
+            hex_unit_type = GameLogic.get_unit_type_for_player(pawn_id, player_1, player_2)
+            if hex_unit_type in ['P', 'J', 'S', 'K', 'B']:
+                return True, 12
+        return False, 15
+    
+
+    @staticmethod
+    def check_friends_for_d(pawns, nationality, player_1, player_2):
+        for pawn_id in pawns:
+            hex_unit_type = GameLogic.get_unit_type_for_player(pawn_id, player_1, player_2)
+            hex_unit_nationality = GameLogic.get_unit_nationality_for_player(pawn_id, player_1, player_2)
+            if hex_unit_type in ['P', 'J', 'S', 'K', 'B'] and hex_unit_nationality == nationality:
+                return True, 12
+        return False, 18
+    
+
+    @staticmethod
+    def has_duplicate_unit_type(unit_type, pawns, player_1, player_2):
+        for pawn_id in pawns:
+            hex_unit_type = GameLogic.get_unit_type_for_player(pawn_id, player_1, player_2)
+            if hex_unit_type in dictionary.basic_quantity_limits[unit_type]:
+                return True
+        return False
 
 
     @staticmethod
-    def base_deploy(unit_id, site, qrs, terrain, phaze, board, flag, find_type):
-        check = False
-        if unit_id is not None:
-            if flag == 'c':
-                unit_type = GameLogic.get_unit_type_for_player_c(site, unit_id, find_type)
-            else:
-                unit_type = GameLogic.get_unit_type_for_player_s(site, unit_id, find_type)
-            if GameLogic.validate_deploy_hex(site, phaze, qrs) == True and terrain not in dictionary.terrain_restrictions[unit_type]:
-                if len(board.hexes[qrs].pawn_list) > 0:
-                    for i in board.hexes[qrs].pawn_list:
-                        if unit_type == 'D' or unit_type == 'N':
-                            if i not in dictionary.basic_quantity_limits['P']:
-                                return
-                            else:
-                                check = True
-                        if i in dictionary.basic_quantity_limits[unit_type]:
-                            return
-                        else:
-                            check = True
-                else:
-                    if unit_type != 'D' and unit_type != 'N':
-                        check = True
-        return check
-        
-                
+    def base_deploy(unit_id, site, qrs, phaze, board, player_1, player_2):
+        if unit_id is None or qrs is None:
+            return False, 11
 
+        hex_ = board.hexes[qrs]
+        terrain = hex_.get_terrain_sign()
+        pawns = hex_.get_pawn_list()
+        unit_type = GameLogic.get_unit_type_for_player(unit_id, player_1, player_2)
+        unit_nationality = GameLogic.get_unit_nationality_for_player(unit_id, player_1, player_2)
+
+        if not GameLogic.validate_deploy_hex(site, phaze, qrs):
+            return False, 13
+
+        if terrain in dictionary.terrain_restrictions[unit_type]:
+            return False, 14
+
+        if not pawns:
+            return (False, 15) if unit_type in ('D', 'N') else (True, 12)
+
+        if not GameLogic.is_friendly_hex(pawns[0], site, player_1, player_2):
+            return False, 16
+
+        if unit_type == 'N':
+            return GameLogic.check_friends_for_n(pawns, player_1, player_2)
+
+        if unit_type == 'D':
+            return GameLogic.check_friends_for_d(pawns, unit_nationality, player_1, player_2)
+
+        if GameLogic.has_duplicate_unit_type(unit_type, pawns, player_1, player_2):
+            return False, 17
+
+        return True, 12
+
+    
+    @staticmethod
+    def check_commander_not_alone(unit_id, qrs, board, player_1, player_2, message):
+        hex_ = board.hexes[qrs]
+        pawns = hex_.get_pawn_list()[:]
+        if len(pawns) > 1:
+            pawns.remove(unit_id)
+            l = []
+            for pawn_id in pawns:
+                hex_unit_type = GameLogic.get_unit_type_for_player(pawn_id, player_1, player_2)
+                l.append(hex_unit_type)
+            if 'D' in l or 'N' in l:
+                if not any(x in l for x in ['P', 'J', 'S', 'K', 'B']):
+                    return False, 19
+        return True, message
+    
+    
+    @staticmethod
+    def check_palace_gward(unit_id, board, player_1, player_2, message):
+        unit_name = GameLogic.get_unit_name(unit_id, player_1, player_2)
+        if unit_name == "Gwardia pałacowa":
+            return False, 22
+        return True, message

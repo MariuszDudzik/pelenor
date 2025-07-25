@@ -42,6 +42,12 @@ class Field(object):
 
     def get_terrain_sign(self):
         return self.terrain_sign
+    
+    def get_pawn_list(self):
+        return self.pawn_list
+    
+    def get_pawn_graph_list(self):
+        return self.pawn_graph_list
 
     def to_dict(self):
         field_dict = {

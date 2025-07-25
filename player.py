@@ -2,6 +2,7 @@ import dictionary
 import pawn
 import random
 import time
+import kolor
 
 class Player(object):
       def __init__(self, name, site, login, spell_power, socket,  picture = None):
@@ -28,7 +29,7 @@ class Player(object):
                 for _ in range(quantity):
                     unit = pawn.Pawn(w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], 
                                     w[10], w[11], w[12], w[13], w[14], w[15], w[16], w[17], 
-                                    w[18], w[19], w[20], w[21], w[22])
+                                    w[18], w[19], w[20], w[21], w[22], kolor.BLACK)
                     unit.id = server_con.get_unit_id()
                     army_dict[unit.id] = unit
 

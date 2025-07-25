@@ -1,3 +1,5 @@
+import kolor
+
 class Pawn(object):
 
     def __init__(self, name = None, nationality = None, type = None, membership = None, 
@@ -5,7 +7,7 @@ class Pawn(object):
                  force_hand_r = None, force_shot = None, force_shot_r = None, shot_range = None, 
                  defence = None, defence_r = None, morale = None, morale_r = None, 
                  demoralization_point = None, authority = None, authority_r = None, 
-                 spell_power = None, movement = None, is_rewers = None, qrs = None, graphics = None):
+                 spell_power = None, movement = None, is_rewers = None, qrs = None, graphics = None, board_colour = None):
         self.id = 0
         self.name = name
         self.nationality = nationality
@@ -44,6 +46,7 @@ class Pawn(object):
         self.siege = False
         self.deploy = False
         self.tar = [] #'T', 'F' smoła
+        self.board_colour = board_colour
 
     def to_dict(self):
         return {
@@ -84,7 +87,8 @@ class Pawn(object):
             'fight': self.fight,
             'siege': self.siege,
             'deploy': self.deploy,
-            'tar': self.tar
+            'tar': self.tar,
+            'board_colour': self.board_colour
         }
     
     def from_dict(self, data):
@@ -126,6 +130,7 @@ class Pawn(object):
         self.siege = data.get('siege', False)
         self.deploy = data.get('deploy', False)
         self.tar = data.get('tar', [])
+        self.board_colour = data.get('board_colour', kolor.BLACK)
         return self
 
     def get_stage_deploy(self):
@@ -154,3 +159,15 @@ class Pawn(object):
 
     def get_unit_type(self):
         return self.unit_type
+
+    def get_board_colour(self):
+        return self.board_colour
+    
+    def set_board_colour(self, colour):
+        self.board_colour = colour
+
+    def get_nationality(self):
+        return self.nationality
+    
+    def get_name(self):
+        return self.name

@@ -5,8 +5,8 @@ class GameController(object):
         self.in_game = True
         self.session_id = None
         self.marked_session_id = None
-        self.choosed_site = None
-        self.choosed_login = None
+        self.chosen_site = None
+        self.chosen_login = None
         self.open_sessions = []
         self.system = platform.system()
         self.default_font = None
@@ -14,6 +14,7 @@ class GameController(object):
         self.akt_phaze = 0
         self.akt_player = 'C'
         self.deploy = True
+        self.enabled = True
         self.move = [[None, None, None], [None]]
 
         self._set_default_font()
@@ -39,12 +40,6 @@ class GameController(object):
     def set_deploy(self, deploy):
         self.deploy = deploy
 
-    def get_site(self):
-        return self.choosed_site
-
-    def set_site(self, site):
-        self.choosed_site = site
-
 
     def get_open_sessions(self):
         return self.open_sessions
@@ -60,10 +55,10 @@ class GameController(object):
         return self.in_game
 
     def get_login(self):
-        return self.choosed_login
+        return self.chosen_login
 
     def set_login(self, login):
-        self.choosed_login = login
+        self.chosen_login = login
 
     def get_session_id(self):
         return self.session_id
@@ -95,8 +90,11 @@ class GameController(object):
     def set_akt_phaze(self, phaze):
         self.akt_phaze = phaze
 
-    def get_choosed_site(self):
-        return self.choosed_site
+    def get_chosen_site(self):
+        return self.chosen_site
+    
+    def set_chosen_site(self, site):
+        self.chosen_site = site
 
     def get_unit_id(self):
         return self.move[0][0]
@@ -112,6 +110,12 @@ class GameController(object):
     def set_unit_flag(self, flag):
         self.move[0][1] = flag
 
+    def set_unit_hex(self, hexid):
+        self.move[0][2] = hexid
+
+    def get_unit_hex(self):
+        return self.move[0][2]
+
     def get_unit_flag(self):
         return self.move[0][1]
 
@@ -120,3 +124,9 @@ class GameController(object):
 
     def set_akt_player(self, player):
         self.akt_player = player
+
+    def get_enabled(self):
+        return self.enabled
+    
+    def set_enabled(self, enabled):
+        self.enabled = enabled

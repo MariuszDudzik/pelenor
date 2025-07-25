@@ -928,12 +928,12 @@ field = (
 
 pawn = (
 (4, "Orki-łucznicy", "Mordor", 'P', 'C', 0, 'E', 'E', 'e', 'e', 2, 3, 2, 'X', 'Y', 93, None, None, None, 4, 'T', None, None, None, None),
-(9, "Orki-lekka piechota", "Mordor", 'P', 'C', 0, 'E', None, None, None, 0, 1, None, 'Z', None, 93, None, None, None, 4, 'N', None, None, None, None),
-(9, "Orki-piechota", "Mordor", 'P', 'C', 0, 'E', 'E', None, None, 0, 2, 1, 'Y', 'Z', 93, None, None, None, 4, 'T', None, None, None, None),
-(3, "Katapulta", "Mordor", 'M', 'C', 0, None, None, 'e', None, 4, None, None, None, None, 93, None, None, None, 2, 'N', None, None, None, None),
-(3, "Maszyna oblężnicza", "Mordor", 'M', 'C', 0, None, None, None, None, None, None, None, None, None, 93, None, None, None, 2, 'N',None, None, None, None),
+(9, "Orki-lekka piechota", "Mordor", 'P', 'C', 30, 'E', None, None, None, 0, 1, None, 'Z', None, 93, None, None, None, 4, 'N', None, None, None, None),
+(9, "Orki-piechota", "Mordor", 'P', 'C', 30, 'E', 'E', None, None, 0, 2, 1, 'Y', 'Z', 93, None, None, None, 4, 'T', None, None, None, None),
+(3, "Katapulta", "Mordor", 'M', 'C', 30, None, None, 'e', None, 4, None, None, None, None, 93, None, None, None, 2, 'N', None, None, None, None),
+(3, "Maszyna oblężnicza", "Mordor", 'M', 'C', 30, None, None, None, None, None, None, None, None, None, 93, None, None, None, 2, 'N',None, None, None, None),
 (1, "Gothmog", "Mordor", 'D', 'C', 0, None, None, None, None, None, None, None, None, None, 93, 4, 2, None, 6, 'T', None, None, None, None),
-(1, "Król Nazguli", "Mordor", 'N', 'C', 0, None, None, None, None, None, None, None, None, None, 93, 7, 3, 8, 6, 'T', None, None, None, None),
+(1, "Król Nazguli", "Mordor", 'N', 'C', 30, None, None, None, None, None, None, None, None, None, 93, 7, 3, 8, 6, 'T', None, None, None, None),
 (3, "Uruk-hai", "Mordor", 'P', 'C', 2, 'E', 'E', None, None, 0, 3, 2, 'Y', 'Z', 93, None, None, None, 4, 'T', None, None, None, None),
 (2, "Kusznicy", "Mordor", 'P', 'C', 2, None, None, 'e', None, 2, 1, None, 'Y', None, 93, None, None, None, 4, 'N', None, None, None, None),
 (2, "Jazda", "Mordor", 'J', 'C', 2, 'D', 'E', None, None, 0, 2, 1, 'Y', 'Z', 93, None, None, None, 6, 'T', None, None, None, None),
@@ -954,7 +954,7 @@ pawn = (
 (1, "Kopijnicy", "Gondor", 'J', 'Z', 0, 'B', 'C', None, None, 0, 3, 2, 'W', 'X', 36, None, None, None, 6, 'T', None, None, None, None),
 (1, "Topornicy", "Gondor", 'P', 'Z', 0, 'B', 'C', None, None, 0, 3, 2, 'X', 'Y', 36, None, None, None, 4, 'T', None, None, None, None),
 (1, "Łucznicy", "Gondor", 'P', 'Z', 0, None, None, 'e', 'e', 2, 2, 3, 'X', 'X', 36, None, None, None, 4, 'T', None, None, None, None),
-(1, "Gwardia pałacowa", "Gondor", 'P', 'Z', 0, 'D', 'E', None, None, 0, 3, 3, 'W', 'X', 36, None, None, None, 4, 'T', (18, -7, -11), None, None, None),
+(1, "Gwardia pałacowa", "Gondor", 'P', 'Z', 0, 'D', 'E', None, None, 0, 3, 3, 'W', 'X', 36, None, None, None, 4, 'T', None, None, None, None),
 (3, "Katapulta", "Gondor", 'M', 'Z', 0, None, None, 'e', None, 4, None, None, None, None, 36, None, None, None, 2, 'N', None, None, None, None),
 (3, "Kocioł", "Gondor", 'M', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, None, None, None, 0, 'N', None, None, None, None),
 (3, "Kocioł makieta", "Gondor", 'M', 'Z', 0, None, None, None, None, None, None, None, None, None, 36, None, None, None, 0, 'N', None, None, None, None),
@@ -1041,8 +1041,18 @@ message = {
     6: "Sauron - działania wodza",
     7: "Westerneńczyk - działania wodza",
     8: "Sauron - oblężenie",
-    10: "Czekaj...",
+    10: "",
     11: "Niepoprawna akcja",
-    12: "Wystawiono jednostkę"
+    12: "Wystawiono jednostkę",
+    13: "Nie możesz wystawić jednostki w tym miejscu",
+    14: "Jednostka nie może wejść na ten teren",
+    15: "Dowódca rozpoczyna grę stojąc na oddziale",
+    16: "Na polu stoją wrogie jednostki",
+    17: "Osiągnięto limit takich jednostek na polu",
+    18: "Dowódca rozpoczyna grę stojąc na oddziale tej samej narodowości",
+    19: "Dowódca nie może zostać bez oddziału, przenieś go na inny oddział",
+    20: "Tura przeciwnika akcja niemożliwa",
+    21: "Przed zakończeniem wszystkie jednostki muszą być wystawione",
+    22: "Gwardia pałacowa rozpoczyna grę na tym polu"
 
 }

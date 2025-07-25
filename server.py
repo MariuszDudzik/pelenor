@@ -78,7 +78,6 @@ class GameServer:
                     else:
                         player_ = self.msg_f_client.prepare_second_player(client_socket, data, self.sessions)
                         self.sessions[session_id]['players'].append(player_)
-                        gamelogic.GameLogic.s_deploy_palace_gward(self.sessions[session_id]['arena'], self.sessions[session_id]['players'])
                         print(f"Gracz {player_.login} dołączył do sesji {session_id}.")
                         self._send_json(client_socket, {'action': 'joined_game', 'session_id': session_id})
                         parcel = self.msg_f_client.start_game(self.sessions[session_id]['players'],
@@ -92,6 +91,15 @@ class GameServer:
                         parcel = self.msg_f_client.deploy_unit(self.sessions[session_id], data)
                         for player in self.sessions[session_id]['players']:
                             self._send_json(player.socket, {'action': 'deploy', 'data': parcel})
+            case 'end_turn':
+                with self.lock:
+                    session_id = data.get('session_id')
+                    if session_id in self.sessions:
+                        parcel, parcel2 = self.msg_f_client.end_turn(self.sessions[session_id], data)
+                        for player in self.sessions[session_id]['players']:
+                            self._send_json(player.socket, {'action': 'end_turn', 'data': parcel})
+                            if parcel2 is not None:
+                                self._send_json(player.socket, {'action': 'deploy', 'data': parcel2})
 
             case 'ping':
                 with self.lock:

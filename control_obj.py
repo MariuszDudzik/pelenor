@@ -11,14 +11,13 @@ import support
 class ControlObj(pygame.sprite.DirtySprite):
     def __init__(self, position_x, position_y, width, height, colour, text, 
                  font_style, font_size, font_colour, on_click_left, on_click_right, 
-                 on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None):
+                 on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK):
         super().__init__()
         self.position_x = position_x
         self.position_y = position_y
         self.width = int(width)
         self.height = int(height)
         self.colour = colour
-        self.board_colour = kolor.BLACK
         self.board_thickness = 1
         self.text = text
         self.wrapped_lines = []
@@ -32,6 +31,7 @@ class ControlObj(pygame.sprite.DirtySprite):
         self.on_scroll_5 = on_scroll_5
         self.on_hover = on_hover
         self.on_unhover = on_unhover
+        self.board_colour = board_colour
         self.hovered = False
         self.active = True
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -203,23 +203,24 @@ class ControlObj(pygame.sprite.DirtySprite):
 
 class Label(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style, 
-                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None):
+                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK):
         super().__init__(position_x, position_y, width, height, colour, text, font_style, 
-                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover,
+                board_colour)
 
 
 class LabelWithScroll(Label):
     def __init__(self, position_x, position_y, width, height, colour, text,
                     font_style, font_size, font_colour, on_click_left, on_click_right,
-                    on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None):
-            
+                    on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK):
+
         self.sessions = []
         self.scroll_offset = 0
         self.selected_idx = None
 
         super().__init__(position_x, position_y, width, height, colour, text,
                         font_style, font_size, font_colour, on_click_left, on_click_right,
-                        on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                        on_scroll_4, on_scroll_5, on_hover, on_unhover, board_colour)
 
     def set_sessions(self, sessions):
         self.sessions = sessions
@@ -239,6 +240,8 @@ class LabelWithScroll(Label):
 
     def get_session_id(self):
         session_data = self.sessions[self.selected_idx]
+        if session_data is None:
+            return
         session_id = session_data['sesja']
         return session_id
 
@@ -331,10 +334,10 @@ class LabelWithScroll(Label):
 
 class TextBox(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style,
-                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None,
+                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK,
                  active_color=None):
         super().__init__(position_x, position_y, width, height, colour, text, font_style,
-                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover, board_colour)
         self.active_color = active_color
         self.active = False
 
@@ -345,35 +348,32 @@ class TextBox(ControlObj):
     
 class Button(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style,
-                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None):
+                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK):
         super().__init__(position_x, position_y, width, height, colour, text, font_style,
-                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover, board_colour)
 
 
 class StageGraph(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style,
-                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None,
-                 stage_obj=None):
+                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK, stage_obj=None):
         super().__init__(position_x, position_y, width, height, colour, text, font_style,
-                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover, board_colour)
         self.stage_obj = stage_obj
 
 
 class PhazeGraph(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style,
-                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None,
-                 phaze_obj=None):
+                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK, phaze_obj=None):
         super().__init__(position_x, position_y, width, height, colour, text, font_style,
-                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover, board_colour)
         self.phaze_obj = phaze_obj
 
 
 class UnitGraph(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style,
-                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None,
-                map_area=None, unit=None):
+                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover=None, on_unhover=None, board_colour=kolor.BLACK, map_area=None, unit=None):
         super().__init__(position_x, position_y, width, height, colour, text, font_style,
-                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover)
+                font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5, on_hover, on_unhover, board_colour)
         self.unit = unit
         self.map_area = map_area
 
@@ -414,12 +414,12 @@ class UnitGraph(ControlObj):
 class Tooltip(ControlObj):
     def __init__(self, position_x, position_y, width, height, colour, text, font_style,
                  font_size, font_colour, on_click_left=None, on_click_right=None,
-                 on_scroll_4=None, on_scroll_5=None, on_hover=None, on_unhover=None):
+                 on_scroll_4=None, on_scroll_5=None, on_hover=None, on_unhover=None, board_colour=kolor.BLACK):
         super().__init__(position_x, position_y, width, height, colour, text, font_style,
                 font_size, font_colour, on_click_left, on_click_right, on_scroll_4, on_scroll_5,
-                on_hover, on_unhover)
-        self.wrapped_lines = [] 
-     
+                on_hover, on_unhover, board_colour)
+        self.wrapped_lines = []
+
 
     def _update_image(self):
         if hasattr(self, 'wrapped_lines') and self.wrapped_lines:

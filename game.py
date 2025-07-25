@@ -33,6 +33,13 @@ class Game(object):
     def get_board(self):
         return self.board
     
+    def get_player_w(self):
+        return self.player_w
+    
+    def get_player_s(self):
+        return self.player_s
+    
+    
 
     
       

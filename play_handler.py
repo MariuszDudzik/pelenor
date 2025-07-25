@@ -25,15 +25,6 @@ class ZoomHandler(object):
             play_obj.set_map_view()
 
 
-    @staticmethod
-    def on_hover(button):
-        button.colour = kolor.RGREY
-
-    @staticmethod
-    def un_hover(button):
-        button.colour = kolor.GREY
-
-
 class ToolTipHandler(object):
 
     @staticmethod
@@ -142,6 +133,15 @@ class Refresh(object):
 class PlayHandler(object):
 
     @staticmethod
+    def on_hover(button):
+        button.colour = kolor.RGREY
+
+    @staticmethod
+    def un_hover(button):
+        button.colour = kolor.GREY
+
+
+    @staticmethod
     def get_hexes_under_rect(rect, hex_graphics_dict, sampling_step=5):
         
         hit_hexes = set()
@@ -153,6 +153,19 @@ class PlayHandler(object):
                         hit_hexes.add(hex_pos)
         return hit_hexes
     
+
+    @staticmethod
+    def action_left_click(play_obj, mouse_position=None):
+        phaze = play_obj.game_controller.get_akt_phaze()
+        stage = play_obj.game_controller.get_akt_stage()
+        site = play_obj.game_controller.get_chosen_site()
+        if gamelogic.GameLogic.check_right_player(site, play_obj.game_controller.get_akt_player()):
+            if phaze == 0:
+                PlayHandler.action_phaze_0(play_obj, site, stage, phaze)
+                
+        else:
+            PlayHandler.show_message(play_obj, 20)
+
 
     @staticmethod
     def change_hex_colour(play_obj, flag, matching):
@@ -182,57 +195,134 @@ class PlayHandler(object):
 
     @staticmethod
     def reinforcement_left_click(play_obj, unit, mouse_position):
-        if gamelogic.GameLogic.check_right_player(play_obj.game_controller.get_akt_player(), play_obj.game_controller.get_choosed_site()):
-            if gamelogic.GameLogic.check_right_player(unit.get_site(), play_obj.game_controller.get_choosed_site()):
-                id = unit.get_id()
+        unit_id = unit.get_id()
 
-                if play_obj.game_controller.get_unit_id() == id:
-                    play_obj.game_controller.set_unit_id(None)
-                    play_obj.game_controller.set_unit_to_move(None)
-                    if not unit.get_distracted():
-                        PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.BLACK, id)
-                    else:
-                        PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.PURPLE, id)
-                else:
-                    if play_obj.game_controller.get_unit_id() == None:
-                        play_obj.game_controller.set_unit_id(id)
+        gc = play_obj.game_controller
+        side = gc.get_chosen_site()
 
-                        PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.GOLD, id)
-                    else:
-                        PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.BLACK, play_obj.game_controller.get_unit_id())
-                        play_obj.game_controller.set_unit_id(id)
-                        PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.GOLD, id)
-                        play_obj.tooltip.set_dirty()
+        if not gamelogic.GameLogic.check_right_player(gc.get_akt_player(), side):
+            return
+        if not gamelogic.GameLogic.check_right_player(unit.get_site(), side):
+            return
+
+        chosen_unit_id = gc.get_unit_id()
+
+        if chosen_unit_id == unit_id:
+            PlayHandler.clear_unit_selection(play_obj, 'R', unit_id, side)
+            return
+
+        if chosen_unit_id is None:
+            qrs = None
+            PlayHandler.select_unit(play_obj, unit_id, side, qrs, 'R')
+        else:
+            if gc.get_unit_hex() is not None:
+                return
+            else:
+                PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.BLACK, chosen_unit_id, side)
+                gc.set_unit_id(unit_id, 'R', None)
+                PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.GOLD, unit_id, side)
+                play_obj.tooltip.set_dirty()
 
 
     @staticmethod
-    def change_unit_outline_colour(play_obj, flag, colour, id):
+    def change_unit_outline_colour(play_obj, flag, colour, unit_id, side):
+        if side == 'Z':
+            play_obj.game.player_w.units[unit_id].set_board_colour(colour)
+        elif side == 'C':
+            play_obj.game.player_s.units[unit_id].set_board_colour(colour)
+        
         if flag == 'R':
-            play_obj.reinforcement[id].set_board_colour(colour)
-            play_obj.reinforcement[id].set_dirty()
+            play_obj.reinforcement[unit_id].set_board_colour(colour)
+            play_obj.reinforcement[unit_id].set_dirty()
         elif flag == 'U':
-            play_obj.unit[id].set_board_colour(colour)
-            play_obj.unit[id].set_dirty()
+            play_obj.units[unit_id].set_board_colour(colour)
+            play_obj.units[unit_id].set_dirty()
+  
 
-    
+    @staticmethod
+    def show_message(play_obj, msg):
+        play_obj.set_message(dictionary.message[msg])
+        play_obj.message_field.set_dirty()
+
+
+    @staticmethod
+    def clear_unit_selection(play_obj, flag, unit_id, site):
+        color = kolor.PURPLE if gamelogic.GameLogic.get_unit_distracted(unit_id, play_obj.get_game().get_player_w(), play_obj.get_game().get_player_s()) else kolor.BLACK
+        PlayHandler.change_unit_outline_colour(play_obj, flag, color, unit_id, site)
+        play_obj.game_controller.set_unit_id(None, None, None)
+        play_obj.game_controller.set_unit_to_move(None)
+
+
+    @staticmethod
+    def select_unit(play_obj, unit_id, site, qrs, flag):
+        play_obj.game_controller.set_unit_id(unit_id, flag, qrs)
+        PlayHandler.change_unit_outline_colour(play_obj, flag, kolor.GOLD, unit_id, site)
+        play_obj.tooltip.set_dirty()
+
+
     @staticmethod
     def hex_left_click(play_obj, hex_obj, mouse_position):
-        site = play_obj.game_controller.get_choosed_site()
-        if gamelogic.GameLogic.check_right_player(site, play_obj.game_controller.get_akt_player()):
-            stage = play_obj.game_controller.get_akt_stage()
-            phaze = play_obj.game_controller.get_akt_phaze()
-          #  flag = play_obj.game_controller.get_unit_flag()
-            unit_id = play_obj.game_controller.get_unit_id()
-            qrs = tuple(hex_obj.get_qrs())
-            terrain = hex_obj.get_terrain_sign()
-            board = play_obj.get_game().get_board()
+        if play_obj.game_controller.get_enabled():
+            site = play_obj.game_controller.get_chosen_site()
+            if gamelogic.GameLogic.check_right_player(site, play_obj.game_controller.get_akt_player()):
+                stage = play_obj.game_controller.get_akt_stage()
+                phaze = play_obj.game_controller.get_akt_phaze()
+                unit_id = play_obj.game_controller.get_unit_id()
+                flag = play_obj.game_controller.get_unit_flag()
+                unit_qrs = play_obj.game_controller.get_unit_hex()
+                qrs = tuple(hex_obj.get_qrs())
+                board = play_obj.get_game().get_board()
+                player_1 = play_obj.get_game().get_player_w()
+                player_2 = play_obj.get_game().get_player_s()
+            
+                if phaze == 0:
+                    PlayHandler.hex_phaze_0_left_click(play_obj, hex_obj, site, stage, phaze, unit_id, flag, qrs, unit_qrs, board, player_1, player_2)
 
-            if phaze == 0:
-                if gamelogic.GameLogic.base_deploy(unit_id, site, qrs, terrain, phaze, board, 'c', play_obj.get_game()):
-                    play_obj.connection.msg_t_server.deploy(play_obj.game_controller.get_session_id(), play_obj.connection.get_socket(), site, stage, phaze, unit_id, qrs)
-                    PlayHandler.change_unit_outline_colour(play_obj, 'R', kolor.BLACK, unit_id)
-                    play_obj.game_controller.set_unit_id(None)
-                    play_obj.game_controller.set_unit_to_move(None)
-                    play_obj.game_controller.set_unit_flag(None)
 
-    
+    @staticmethod
+    def hex_phaze_0_left_click(play_obj, hex_obj, site, stage, phaze, unit_id, flag, qrs, unit_qrs, board, player_1, player_2):
+        try:
+            if unit_id is not None:
+                if flag in ['R', 'U']:
+                    check, msg = gamelogic.GameLogic.base_deploy(unit_id, site, qrs, phaze, board, player_1, player_2)
+                    if check and flag == 'U' and qrs != unit_qrs:
+                        check, msg = gamelogic.GameLogic.check_commander_not_alone(unit_id, unit_qrs, board, player_1, player_2, msg)
+                        if check and site == 'Z':
+                            check, msg = gamelogic.GameLogic.check_palace_gward(unit_id, board, player_1, player_2, msg)
+                    if check:
+                        PlayHandler.show_message(play_obj, 10)
+                        play_obj.connection.msg_t_server.deploy(
+                            play_obj.game_controller.get_session_id(),
+                            play_obj.connection.get_socket(),
+                            site, stage, phaze, unit_id, qrs, flag
+                        )
+                        PlayHandler.clear_unit_selection(play_obj, flag, unit_id, site)
+                    else:
+                        PlayHandler.show_message(play_obj, msg)
+
+            else:
+                if hex_obj.get_pawn_list():
+                    unit_hex = play_obj.game.board.hexes[qrs].pawn_graph_list[-1]
+                    unit_site = gamelogic.GameLogic.get_unit_site(unit_hex, player_1, player_2)
+
+                    if gamelogic.GameLogic.check_right_player(unit_site, site):
+                        PlayHandler.select_unit(play_obj, unit_hex, site, qrs, 'U')
+
+        except Exception as e:
+            PlayHandler.clear_unit_selection(play_obj, flag, unit_id, site)
+ 
+
+    @staticmethod
+    def action_phaze_0(play_obj, site, stage, phaze):
+        deployed = True
+        if play_obj.game_controller.get_deploy():
+            units = gamelogic.GameLogic.get_units_for_player(site, play_obj.game.get_player_w(), play_obj.game.get_player_s())
+            for unit in units.values():
+                if unit.get_stage_deploy() <= stage and unit.get_deploy() == False:
+                    deployed = False
+                    break
+        if deployed:
+            PlayHandler.show_message(play_obj, 10)
+            play_obj.connection.msg_t_server.end_turn(play_obj.game_controller.get_session_id(), play_obj.connection.get_socket(), site, stage, phaze)
+        else:
+            PlayHandler.show_message(play_obj, 21)

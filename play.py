@@ -37,6 +37,8 @@ class Play(object):
         self.tooltip_graphics = pygame.sprite.LayeredDirty()
         self.mouse_dragging = False
         self.last_mouse_pos = None 
+        self.last_click_time = 0
+        self.click_cooldown = 200
 
         self.player_w_field = control_obj.Label(0, 0, screen.get_width() * 0.1, screen.get_height() // 2,
                             kolor.GREEN, "", None, int(screen.get_height() * 0.035), kolor.WHITE, None, None, None, None)
@@ -84,10 +86,10 @@ class Play(object):
                             partial(play_handler.ZoomHandler.handle_out, self.get_camera, self), None, None)
         self.zoom_in_button = control_obj.Button(self.state_field.get_position_x() + (screen.get_height() * 0.0028), 
                             screen.get_height() * 0.0028, screen.get_height() * 0.028, screen.get_height() * 0.028, 
-                            kolor.GREY, "+", self.game_controller.get_default_font(), int(screen.get_height() * 0.03), kolor.BLACK, partial(play_handler.ZoomHandler.handle_in, self.get_camera, self), None, None, None, play_handler.ZoomHandler.on_hover, play_handler.ZoomHandler.un_hover)
+                            kolor.GREY, "+", self.game_controller.get_default_font(), int(screen.get_height() * 0.03), kolor.BLACK, partial(play_handler.ZoomHandler.handle_in, self.get_camera, self), None, None, None, play_handler.PlayHandler.on_hover, play_handler.PlayHandler.un_hover)
         self.zoom_out_button = control_obj.Button(self.state_field.get_position_x() + (screen.get_height() * 0.033),
                             screen.get_height() * 0.0028, screen.get_height() * 0.028, screen.get_height() * 0.028, 
-                            kolor.GREY, "-", self.game_controller.get_default_font(), int(screen.get_height() * 0.03), kolor.BLACK, partial(play_handler.ZoomHandler.handle_out, self.get_camera, self), None, None, None, play_handler.ZoomHandler.on_hover, play_handler.ZoomHandler.un_hover)
+                            kolor.GREY, "-", self.game_controller.get_default_font(), int(screen.get_height() * 0.03), kolor.BLACK, partial(play_handler.ZoomHandler.handle_out, self.get_camera, self), None, None, None, play_handler.PlayHandler.on_hover, play_handler.PlayHandler.un_hover)
         self.dice_button = control_obj.Button(self.state_field.get_position_x() + 
                             (self.state_field.get_width() // 3 // 3),len(self.game.get_stages_list()) * (self.state_field.get_height() / 24) + screen.get_height() * 0.033 + screen.get_height() * 0.028 + 26, self.state_field.get_width() // 3, self.state_field.get_width() // 3, kolor.GREY, "", self.game_controller.get_default_font(),int(screen.get_height() * 0.03), kolor.BLACK, None, None, None, None, None, None)
         self.result_field = control_obj.Label(self.dice_button.get_position_x() + self.dice_button.get_width() 
@@ -95,7 +97,7 @@ class Play(object):
         self.message_field = control_obj.Label(self.state_field.get_position_x() + (screen.get_height() * 0.0028),  
                             self.dice_button.get_position_y() + self.dice_button.get_height() + 10,  self.state_field.get_width() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.100, kolor.WHITE, "", self.game_controller.get_default_font(), int(screen.get_height() * 0.016), kolor.BLACK, None, None, None, None, None, None)
         self.action_button = control_obj.Button(self.state_field.get_position_x() + (screen.get_height() * 0.0028), 
-                            self.message_field.get_position_y() + self.message_field.get_height() + 3, self.state_field.get_width() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.045, kolor.GREY, "", self.game_controller.get_default_font(), int(screen.get_height() * 0.03),kolor.BLACK, None, None, None, None, None, None)
+                            self.message_field.get_position_y() + self.message_field.get_height() + 3, self.state_field.get_width() - (screen.get_height() * 0.0028 * 2), screen.get_height() * 0.045, kolor.GREY, "Zakończ turę", self.game_controller.get_default_font(), int(screen.get_height() * 0.045 * 0.6), kolor.BLACK, partial(play_handler.PlayHandler.action_left_click, play_obj=self), None, None, None, play_handler.PlayHandler.on_hover, play_handler.PlayHandler.un_hover)
         self.tooltip = control_obj.Tooltip(0, 0, 0, 0, kolor.WHITE, "", self.game_controller.get_default_font()
                             , int(screen.get_height() * 0.015), kolor.BLACK, None, None, None, None, None, None)
 
@@ -154,11 +156,11 @@ class Play(object):
         self.map_view.add(*self.hex.values(), layer=3)
 
         for unit in self.game.player_w.get_units().values():
-            if unit.get_qrs() is not None and unit.get_qrs() in self.hex:
+            if unit.get_qrs() is not None and tuple(unit.get_qrs()) in self.hex:
                 self.add_unit('Z', unit.id, unit.get_qrs())
 
         for unit in self.game.player_s.get_units().values():
-            if unit.get_qrs() is not None and unit.get_qrs() in self.hex:
+            if unit.get_qrs() is not None and tuple(unit.get_qrs()) in self.hex:
                 self.add_unit('C', unit.id, unit.get_qrs())
 
 
@@ -187,6 +189,13 @@ class Play(object):
         if unit:
             self.left_menu_graphics.remove(unit)
             del self.reinforcement[unit_id]
+
+
+    def remove_unit(self, unit_id):
+        unit = self.units.get(unit_id)
+        if unit:
+            self.map_view.remove(unit)
+            del self.units[unit_id]
 
 
     def _init_stage_and_phaze_fields(self):
@@ -304,26 +313,15 @@ class Play(object):
         layernr = 10 + index
 
         max_line_width = self.screen.get_width() * 0.08
-        unitG = control_obj.UnitGraph(
-            pos_x, pos_y, size, size, colour, "",
-            self.game_controller.get_default_font(),
-            int(size * 0.85 / 3), kolor.BLACK,
-            None, None, None, None,
-            partial(play_handler.ToolTipHandler.on_hover_unit,
-                    get_tooltip=self.get_tooltip,
-                    tool_x=pos_x, tool_y=pos_y - 75,
-                    max_line_width=max_line_width, play_obj=self),
-            partial(play_handler.ToolTipHandler.un_hover_unit, play_obj=self),
-            self.get_map(),
-            unit=unit
-        )
-        unitG.wrapped_lines = gamelogic.GameLogic.unit_full_string(unit, self.game_controller.get_choosed_site())
+        unitG = control_obj.UnitGraph(pos_x, pos_y, size, size, colour, "",self.game_controller.get_default_font(),
+                int(size * 0.85 / 3), kolor.BLACK, None, None, None, None, partial(play_handler.ToolTipHandler.on_hover_unit,get_tooltip=self.get_tooltip, tool_x=pos_x, tool_y=pos_y - 75,max_line_width=max_line_width, play_obj=self),
+                partial(play_handler.ToolTipHandler.un_hover_unit, play_obj=self), unit.get_board_colour(), self.get_map(), unit=unit)
+        unitG.wrapped_lines = gamelogic.GameLogic.unit_full_string(unit, self.game_controller.get_chosen_site())
         text = f"{unit.name}\n {unit.nationality}\n {unitG.wrapped_lines[2]}"
         unitG.set_tip_text(text)
         self.units[id] = unitG
         self.map_view.add(unitG, layer=layernr)
 
-     
 
     def change_unit_on_hex(self, first_gunit):
         qrs = first_gunit.unit.get_qrs()
@@ -389,10 +387,10 @@ class Play(object):
                         int(height * 0.85 / 3), kolor.BLACK, partial(play_handler.PlayHandler.reinforcement_left_click,
                         play_obj=self, unit=unit), None, None, None,
                         partial(play_handler.ToolTipHandler.on_hover_reinforcement, get_tooltip=self.get_tooltip, tool_x=tooltip_x, tool_y=position_y - 75, max_line_width=max_line_width),
-                        partial(play_handler.ToolTipHandler.un_hover_reinforcement, play_obj=self), None, unit)
-                    unit_g.wrapped_lines = gamelogic.GameLogic.unit_full_string(unit, self.game_controller.get_choosed_site())
+                        partial(play_handler.ToolTipHandler.un_hover_reinforcement, play_obj=self), unit.get_board_colour(), None, unit)
+                    unit_g.wrapped_lines = gamelogic.GameLogic.unit_full_string(unit, self.game_controller.get_chosen_site())
 
-                    text = f"{gamelogic.GameLogic.change_pot_name(unit, self.game_controller.get_site())}\n {unit.nationality}\n {unit_g.wrapped_lines[2]}"
+                    text = f"{gamelogic.GameLogic.change_pot_name(unit, self.game_controller.get_chosen_site())}\n {unit.nationality}\n {unit_g.wrapped_lines[2]}"
                     unit_g.set_tip_text(text)
                     self.reinforcement[unit.id] = unit_g
                     in_row += 1
@@ -413,8 +411,8 @@ class Play(object):
                         int(height * 0.85 / 3), kolor.BLACK, partial(play_handler.PlayHandler.reinforcement_left_click,
                         play_obj=self, unit=unit), None, None, None,
                         partial(play_handler.ToolTipHandler.on_hover_reinforcement, get_tooltip=self.get_tooltip, tool_x=tooltip_x, tool_y=position_y - 85, max_line_width=max_line_width),
-                        partial(play_handler.ToolTipHandler.un_hover_reinforcement, play_obj=self), None, unit)
-                    unit_g.wrapped_lines = gamelogic.GameLogic.unit_full_string(unit, self.game_controller.get_choosed_site())
+                        partial(play_handler.ToolTipHandler.un_hover_reinforcement, play_obj=self), unit.get_board_colour(), None, unit)
+                    unit_g.wrapped_lines = gamelogic.GameLogic.unit_full_string(unit, self.game_controller.get_chosen_site())
                     text = f"{unit.name}\n {unit.nationality}\n {unit_g.wrapped_lines[2]}"
                     unit_g.set_tip_text(text)
                     self.reinforcement[unit.id] = unit_g
@@ -546,29 +544,7 @@ class Play(object):
 
         return visible_hexes
 
-
-
-    def handle_event(self, mouse_position, event):
-        self.zoom_in_button.handle_event(mouse_position, event)
-        self.zoom_out_button.handle_event(mouse_position, event)
-        self.map.handle_event(mouse_position, event)
-        self.tooltip.handle_event(mouse_position, event)
-        for unitG in self.reinforcement.values():
-            unitG.handle_event(mouse_position, event)
-        for hexG in self.hex.values():
-            hexG.handle_event(mouse_position, event)
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                self.mouse_dragging = True
-                self.last_mouse_pos = mouse_position
-        
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:
-                self.mouse_dragging = False
-                self.last_mouse_pos = None
-
-
+   
     def _clamp_camera(self):
         cam = self.camera
         if cam.get_camera_x() < cam.get_min_x():
@@ -579,6 +555,35 @@ class Play(object):
             cam.set_camera_y(cam.get_min_y())
         elif cam.get_camera_y() > cam.get_max_y():
             cam.set_camera_y(cam.get_max_y())
+
+
+    def handle_event(self, mouse_position, event):
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.last_click_time < self.click_cooldown:
+                return
+            self.last_click_time = current_time
+            if event.button == 1:
+                self.mouse_dragging = True
+                self.last_mouse_pos = mouse_position
+        
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                self.mouse_dragging = False
+                self.last_mouse_pos = None
+
+        self.zoom_in_button.handle_event(mouse_position, event)
+        self.zoom_out_button.handle_event(mouse_position, event)
+        self.map.handle_event(mouse_position, event)
+        self.tooltip.handle_event(mouse_position, event)
+        self.action_button.handle_event(mouse_position, event)
+        for unitG in self.reinforcement.values():
+            unitG.handle_event(mouse_position, event)
+        for unitG in self.units.values():
+            unitG.handle_event(mouse_position, event)
+        for hexG in self.hex.values():
+            hexG.handle_event(mouse_position, event)
 
 
     def handle_mouse_motion(self, mouse_position, event):

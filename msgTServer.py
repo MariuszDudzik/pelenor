@@ -28,7 +28,7 @@ class MsgTServer(object):
     def create_game(self, client_socket): 
         payload = {
         'login': self.game_controller.get_login(),
-        'site': self.game_controller.get_site()
+        'site': self.game_controller.get_chosen_site()
         }
         self._send_request('create_game', payload, client_socket)
 
@@ -46,14 +46,26 @@ class MsgTServer(object):
         self._send_request('join_game', payload, client_socket)
 
 
-    def deploy(self, sessionid, client_socket, site, stage, phaze, unit_id, qrs):
+    def deploy(self, session_id, client_socket, site, stage, phaze, unit_id, qrs, flag):
 
         payload = {
-            'session_id': sessionid,
+            'session_id': session_id,
             'site': site,
             'stage': stage,
             'phaze': phaze,
             'unit_id': unit_id,
-            'qrs': qrs
+            'qrs': qrs,
+            'flag': flag
         }
         self._send_request('deploy', payload, client_socket)
+
+
+    def end_turn(self, session_id, client_socket, site, stage, phaze):
+        payload = {
+            'session_id': session_id,
+            'site': site,
+            'stage': stage,
+            'phaze': phaze,
+            
+        }
+        self._send_request('end_turn', payload, client_socket)
