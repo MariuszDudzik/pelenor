@@ -48,6 +48,9 @@ class Field(object):
     
     def get_pawn_graph_list(self):
         return self.pawn_graph_list
+    
+    def get_movement_point_to_spend(self):
+        return self.movement_point_to_spend
 
     def to_dict(self):
         field_dict = {

@@ -71,10 +71,44 @@ class MsgFClient(object):
         return False
     
 
-    def error_parcel(message):
+    def error_parcel(self, message):
         parcel = {'message': message}
         return parcel
+    
 
+    def handle_deploy(self, site, server_session, unit_id, qrs, stage, phaze, flag, old_qrs=None):
+
+        units = gamelogic.GameLogic.get_units_for_player(site, server_session['players'][0], server_session['players'][1])
+        akt_movement = gamelogic.GameLogic.set_akt_movement_after_deploy(unit_id, units, stage, server_session['arena'],qrs, site)
+        units[unit_id].set_deploy()
+        units[unit_id].set_qrs(qrs)
+        units[unit_id].set_akt_movement(akt_movement)
+        server_session['arena'].hexes[qrs].pawn_list.append(unit_id)
+        
+        parcel = {
+            'player': site,
+            'phaze': phaze,
+            'flag': flag,
+            'unit': [{
+                'id': unit_id,
+                'deploy': True,
+                'qrs': qrs,
+                'akt_movement': akt_movement
+                }],
+            'hex': [{
+                'qrs': qrs,
+                'unit_add': True,
+                'unit_remove': False
+            }],
+            'message': 12
+            }
+        if flag == 'U':
+            parcel['hex'].append({
+                'qrs': old_qrs,
+                'unit_add': False,
+                'unit_remove': True
+            })
+        return parcel
 
     def deploy_unit(self, server_session, data):
         site = data.get('site')
@@ -93,49 +127,21 @@ class MsgFClient(object):
         if not check:
             return self.error_parcel(message)
         
+        old_qrs = None
         if flag == 'U':
             old_qrs = gamelogic.GameLogic.get_unit_qrs(unit_id, server_session['players'][0], server_session['players'][1]) 
             check, message = gamelogic.GameLogic.check_commander_not_alone(unit_id, old_qrs, server_session['arena'], server_session['players'][0], server_session['players'][1], message)
             if not check:
                 return self.error_parcel(message)
 
-            if site == 'Z':
+            if stage == 0 and site == 'Z':
                 check, message = gamelogic.GameLogic.check_palace_gward(unit_id, server_session['arena'], server_session['players'][0], server_session['players'][1], message)
                 if not check:
                     return self.error_parcel(message)
 
             server_session['arena'].hexes[old_qrs].pawn_list.remove(unit_id)
 
-        player = gamelogic.GameLogic.get_player_by_unit_id(unit_id, server_session['players'][0], server_session['players'][1])
-
-        player.get_units()[unit_id].set_deploy()
-        player.get_units()[unit_id].set_qrs(qrs)
-        server_session['arena'].hexes[qrs].pawn_list.append(unit_id)
-        if stage != 0:
-            pass
-            #dopisac pomniejszenie ruchu jednostki
-        parcel = {
-            'player': site,
-            'phaze': phaze,
-            'flag': flag,
-            'unit': [{
-                'id': unit_id,
-                'deploy': True,
-                'qrs': qrs
-                }],
-            'hex': [{
-                'qrs': qrs,
-                'unit_add': True,
-                'unit_remove': False
-            }],
-            'message': 12
-            }
-        if flag == 'U':
-            parcel['hex'].append({
-                'qrs': old_qrs,
-                'unit_add': False,
-                'unit_remove': True
-            })
+        parcel = self.handle_deploy(site, server_session, unit_id, qrs, stage, phaze, flag, old_qrs)
         return parcel
    
                         
@@ -143,58 +149,35 @@ class MsgFClient(object):
         site = data.get('site')
         stage = data.get('stage')
         phaze = data.get('phaze')
-        if server_session['handler'].get_akt_player() == site:
-            if stage == server_session['handler'].get_akt_stage() and phaze == server_session['handler'].get_akt_phaze():
-                if phaze == 0:
-                    deployed = True
-                    if server_session['handler'].get_deploy():
-                        units = gamelogic.GameLogic.get_units_for_player(site, server_session['players'][0], server_session['players'][1])
+        if self.check_right_turn(server_session, site, stage, phaze):
+            if phaze == 0:
+                deployed = gamelogic.GameLogic.chceck_if_deployed(site, stage, server_session['players'][0], server_session['players'][1])
+                if deployed:
+                    if site == 'C':
+                        server_session['handler'].set_akt_player('Z')
+                        parcel = {'game': {'akt_player': 'Z', 'phaze': 0, 'stage': 0, 'deploy': True},
+                                    'message': 1
+                                    }
+                        
+                        units = gamelogic.GameLogic.get_units_for_player('Z', server_session['players'][0], server_session['players'][1])
+                        unit_id = None
                         for unit in units.values():
-                            if unit.get_stage_deploy() <= stage and unit.get_deploy() == False:
-                                deployed = False
+                            if unit.get_name() == "Gwardia pałacowa":
+                                unit_id = unit.get_id()
                                 break
-                    if deployed:
-                        if site == 'C':
-                            server_session['handler'].set_akt_player('Z')
-                            parcel = {'game': {'akt_player': 'Z', 'phaze': 0, 'stage': 0},
-                                      'message': 1
-                                      }
-                            
-                            units = gamelogic.GameLogic.get_units_for_player('Z', server_session['players'][0], server_session['players'][1])
-                            unit_id = None
-                            for unit in units.values():
-                                if unit.get_name() == "Gwardia pałacowa":
-                                    unit_id = unit.get_id()
-                                    break
 
-                            units[unit_id].set_deploy()
-                            units[unit_id].set_qrs((18, -7, -11))
-                            server_session['arena'].hexes[(18, -7, -11)].pawn_list.append(unit_id)
-                            parcel2 = {
-                                        'player': 'Z',
-                                        'phaze': 0,
-                                        'flag': 'R',
-                                        'unit': [{
-                                            'id': unit_id,
-                                            'deploy': True,
-                                            'qrs': (18, -7, -11)
-                                            }],
-                                        'hex': [{
-                                            'qrs': (18, -7, -11),
-                                            'unit_add': True,
-                                            'unit_remove': False
-                                        }],
-                                        'message': 12
-                                }
-                            
-                            return parcel, parcel2
-                        else:
-                            parcel = {'game': [{'akt_player': 'Z'}, {'phaze': 0}, {'stage': 0}],
-                                      'message': 7
-                                      }
-                            parcel2 = None
-                            return parcel, parcel2
+                        parcel2 = self.handle_deploy('Z', server_session, unit_id, (18, -7, -11), stage, phaze, 'R', None)
+                        return parcel, parcel2
                     else:
-                        parcel = {'message': 21}
+                        server_session['handler'].set_akt_stage(1)
+                        server_session['handler'].set_akt_phaze(1)
+                        server_session['handler'].set_deploy(False)
+                        parcel = {'game': {'akt_player': 'Z', 'phaze': 1, 'stage': 1, 'deploy': False},
+                                    'message': 7
+                                    }
                         parcel2 = None
                         return parcel, parcel2
+                else:
+                    parcel = {'message': 21}
+                    parcel2 = None
+                    return parcel, parcel2

@@ -171,3 +171,12 @@ class Pawn(object):
     
     def get_name(self):
         return self.name
+    
+    def get_movement(self):
+        return self.movement
+    
+    def get_akt_movement(self):
+        return self.akt_movement
+    
+    def set_akt_movement(self, movement):
+        self.akt_movement = movement

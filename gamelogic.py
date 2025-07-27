@@ -247,3 +247,29 @@ class GameLogic(object):
         if unit_name == "Gwardia pałacowa":
             return False, 22
         return True, message
+    
+
+    @staticmethod
+    def set_akt_movement_after_deploy(unit_id, units, stage, board, qrs, site):
+        if stage == 0:
+            if site == 'C' or units[unit_id].get_unit_type() in ['N', 'D', 'M']:
+                akt_movement = units[unit_id].get_movement()
+            else:
+                akt_movement = 5
+        else:
+            hex_movement_point = board.hexes[qrs].get_movement_point_to_spend()
+            akt_movement = units[unit_id].get_movement() - hex_movement_point
+
+        return akt_movement
+
+
+    @staticmethod
+    def chceck_if_deployed(site, stage, player_1, player_2):
+        deployed = True
+        units = GameLogic.get_units_for_player(site, player_1, player_2)
+        for unit in units.values():
+            if unit.get_stage_deploy() <= stage and not unit.get_deploy():
+                deployed = False
+                break
+        return deployed
+        

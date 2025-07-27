@@ -83,6 +83,7 @@ class MsgFServer(object):
                 qrs = tuple(unit['qrs'])
              
                 player.get_units()[unit_id].set_qrs(qrs)
+                player.get_units()[unit_id].set_akt_movement(unit['akt_movement'])
                 if flag == 'R':
                     self.play.remove_reinforcement(unit_id)
                     self.play.add_unit(site, unit_id, qrs)
@@ -95,8 +96,7 @@ class MsgFServer(object):
                             self.play.game.board.hexes[tuple(hex['qrs'])].pawn_graph_list.remove(unit_id)
                             self.play.hex[tuple(hex['qrs'])].set_dirty()
 
-        self.play.set_message(dictionary.message[msg])
-        self.play.message_field.set_dirty()
+        play_handler.PlayHandler.show_message(self.play, msg)
 
 
     def end_turn(self, data):
@@ -105,13 +105,15 @@ class MsgFServer(object):
             game_data = data['data']['game']
             stage = game_data['stage']
             phaze = game_data['phaze']
+            deploy = game_data['deploy']
             akt_player = game_data['akt_player']
             self.game_controller.set_akt_stage(stage)
             self.game_controller.set_akt_phaze(phaze)
             self.game_controller.set_akt_player(akt_player)
+            self.game_controller.set_deploy(deploy)
             if phaze == 0 and akt_player == 'Z':
                 play_handler.PlayHandler.change_hex_colour_handler(self.play, True, 'C', 0)
                 play_handler.PlayHandler.change_hex_colour_handler(self.play, False, 'Z', 0)
-
-        self.play.set_message(dictionary.message[msg])
-        self.play.message_field.set_dirty()
+            if phaze == 1 and stage == 1:
+                play_handler.PlayHandler.change_hex_colour_handler(self.play, True, 'Z', 0)
+        play_handler.PlayHandler.show_message(self.play, msg)

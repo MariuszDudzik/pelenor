@@ -284,21 +284,25 @@ class PlayHandler(object):
         try:
             if unit_id is not None:
                 if flag in ['R', 'U']:
-                    check, msg = gamelogic.GameLogic.base_deploy(unit_id, site, qrs, phaze, board, player_1, player_2)
-                    if check and flag == 'U' and qrs != unit_qrs:
-                        check, msg = gamelogic.GameLogic.check_commander_not_alone(unit_id, unit_qrs, board, player_1, player_2, msg)
-                        if check and site == 'Z':
-                            check, msg = gamelogic.GameLogic.check_palace_gward(unit_id, board, player_1, player_2, msg)
-                    if check:
-                        PlayHandler.show_message(play_obj, 10)
-                        play_obj.connection.msg_t_server.deploy(
-                            play_obj.game_controller.get_session_id(),
-                            play_obj.connection.get_socket(),
-                            site, stage, phaze, unit_id, qrs, flag
-                        )
-                        PlayHandler.clear_unit_selection(play_obj, flag, unit_id, site)
+                    if qrs == unit_qrs:
+                            PlayHandler.clear_unit_selection(play_obj, flag, unit_id, site)
                     else:
-                        PlayHandler.show_message(play_obj, msg)
+                        check, msg = gamelogic.GameLogic.base_deploy(unit_id, site, qrs, phaze, board, player_1, player_2)
+                        if check and flag == 'U':
+                            
+                                check, msg = gamelogic.GameLogic.check_commander_not_alone(unit_id, unit_qrs, board, player_1, player_2, msg)
+                                if check and site == 'Z':
+                                    check, msg = gamelogic.GameLogic.check_palace_gward(unit_id, board, player_1, player_2, msg)
+                        if check:
+                            PlayHandler.show_message(play_obj, 10)
+                            play_obj.connection.msg_t_server.deploy(
+                                play_obj.game_controller.get_session_id(),
+                                play_obj.connection.get_socket(),
+                                site, stage, phaze, unit_id, qrs, flag
+                            )
+                            PlayHandler.clear_unit_selection(play_obj, flag, unit_id, site)
+                        else:
+                            PlayHandler.show_message(play_obj, msg)
 
             else:
                 if hex_obj.get_pawn_list():
@@ -311,7 +315,7 @@ class PlayHandler(object):
         except Exception as e:
             PlayHandler.clear_unit_selection(play_obj, flag, unit_id, site)
  
-
+    """
     @staticmethod
     def action_phaze_0(play_obj, site, stage, phaze):
         deployed = True
@@ -321,6 +325,16 @@ class PlayHandler(object):
                 if unit.get_stage_deploy() <= stage and unit.get_deploy() == False:
                     deployed = False
                     break
+        if deployed:
+            PlayHandler.show_message(play_obj, 10)
+            play_obj.connection.msg_t_server.end_turn(play_obj.game_controller.get_session_id(), play_obj.connection.get_socket(), site, stage, phaze)
+        else:
+            PlayHandler.show_message(play_obj, 21)
+    """
+
+    @staticmethod
+    def action_phaze_0(play_obj, site, stage, phaze):
+        deployed = gamelogic.GameLogic.chceck_if_deployed(site, stage, play_obj.game.get_player_w(), play_obj.game.get_player_s())
         if deployed:
             PlayHandler.show_message(play_obj, 10)
             play_obj.connection.msg_t_server.end_turn(play_obj.game_controller.get_session_id(), play_obj.connection.get_socket(), site, stage, phaze)
