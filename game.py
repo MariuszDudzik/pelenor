@@ -2,6 +2,7 @@ import player
 import board
 import stage
 import phaze
+import gamelogic
 
 class Game(object):
 
@@ -9,6 +10,7 @@ class Game(object):
         self.player_w = player.Player('', 'Z', '', 0, None)
         self.player_s = player.Player('', 'C', '', 0, None)
         self.board = board.Board()
+        self.minas_tirith_dict = None
         self.stages = stage.create_stage()
         self.phazes = phaze.create_phaze()
 
@@ -38,6 +40,9 @@ class Game(object):
     
     def get_player_s(self):
         return self.player_s
+    
+    def set_minas_tirith_dict(self):
+        self.minas_tirith_dict = gamelogic.GameLogic.create_mn_level_dict(self.board.get_hexes())
     
     
 

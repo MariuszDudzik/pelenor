@@ -65,6 +65,7 @@ def main():
                     connection_.set_action(None)
             else:
                 if clear:
+                    play_.game.set_minas_tirith_dict()
                     play_.add_reinforcement()
                     play_.add_reinforcement_graphics()
                     play_handler.Refresh.refresh_login(play_)

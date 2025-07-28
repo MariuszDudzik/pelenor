@@ -1,3 +1,5 @@
+
+
 class ServerController():
     def __init__(self):
         self.unit_id = 1
@@ -5,6 +7,7 @@ class ServerController():
         self.akt_phaze = 0
         self.akt_player = 'C'
         self.deploy = True
+        self.minas_tirith_dict = None
 
     def get_unit_id(self):
         unit_id = self.unit_id
@@ -34,5 +37,11 @@ class ServerController():
 
     def set_deploy(self, deploy):
         self.deploy = deploy
+
+    def set_minas_tirith_dict(self, minas_tirith_dict):
+        self.minas_tirith_dict = minas_tirith_dict
+
+    def get_minas_tirith_dict(self):
+        return self.minas_tirith_dict
 
  

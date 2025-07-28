@@ -923,7 +923,7 @@ field = (
 """
 4 kolumna W -biała linia, B - czarna linia, R - brama
 5 kolumna g -standardowa grubosc, s - sciana, m - mur, t - ?, b - ?
-6 kolumna w - wszyscy, p - piechota, s- sciana, m -mur, g - ?
+6 kolumna w - wszyscy, p - piechota, s- sciana, m -mur, n- nikt, b- brama,  g - ?
 """
 
 pawn = (

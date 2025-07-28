@@ -59,7 +59,8 @@ class GameServer:
                     session_id = self.next_session_id
                     server_con = servercontroller.ServerController()
                     player_, board_ = self.msg_f_client.create_game(client_socket, data, server_con)
-                    self.sessions[session_id] = {'players': [player_], 'arena': board_, 'handler': server_con}
+                    server_con.set_minas_tirith_dict(gamelogic.GameLogic.create_mn_level_dict(board_.get_hexes()))
+                    self.sessions[session_id] = {'players': [player_], 'arena': board_, 'handler': server_con}    
                     self.next_session_id += 1
                     print(f"Sesja {session_id} utworzona przez {player_.login}.")
                     sessions = self.msg_f_client.open_sessions_game(self.sessions)

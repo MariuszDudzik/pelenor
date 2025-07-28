@@ -79,6 +79,91 @@ class GameLogic(object):
             return True
         return False
     
+
+    @staticmethod
+    def minas_tirith(hex):
+        if (hex[0] > 5 and hex[0] < 19 and hex[1] < 6) or (hex[0] > 18 and hex[0] < 31 and hex[2] > -24):
+            return True
+        return False
+    
+
+    @staticmethod
+    def mn_level_1(hex):
+        if (hex[0] > 5 and hex[0] < 8 and hex[1] < 6) or (hex[0] > 7 and hex[0] < 19 and hex[1] < 6 and hex[1] > 3) or (hex[0] > 28 and hex[0] < 31 and hex[2] > -24) or (hex[0] > 18 and hex[0] < 29 and hex[2] < -21 and hex[2] > -24):
+            return True
+        return False
+    
+
+    @staticmethod
+    def mn_level_2(hex):
+        if (hex[0] > 7 and hex[0] < 10 and hex[1] < 4) or (hex[0] > 9 and hex[0] < 19 and hex[1] < 4 and hex[1] > 1) or (hex[0] > 26 and hex[0] < 29 and hex[2] > -22) or (hex[0] > 18 and hex[0] < 27 and hex[2] < -19 and hex[2] > -22):
+            return True
+        return False
+    
+
+    @staticmethod
+    def mn_level_3(hex):
+        if (hex[0] > 9 and hex[0] < 12 and hex[1] < 2) or (hex[0] > 11 and hex[0] < 19 and hex[1] < 2 and hex[1] > -1) or (hex[0] > 24 and hex[0] < 27 and hex[2] > -20) or (hex[0] > 18 and hex[0] < 27 and hex[2] < -17 and hex[2] > -20):
+            return True
+        return False
+    
+
+    @staticmethod
+    def mn_level_4(hex):
+        if (hex[0] > 11 and hex[0] < 14 and hex[1] < 0) or (hex[0] > 13 and hex[0] < 19 and hex[1] < 0 and hex[1] > -3) or (hex[0] > 22 and hex[0] < 25 and hex[2] > -18) or (hex[0] > 18 and hex[0] < 23 and hex[2] < -15 and hex[2] > -18):
+            return True
+        return False
+    
+
+    @staticmethod
+    def mn_level_5(hex):
+        if (hex[0] > 13 and hex[0] < 16 and hex[1] < -2) or (hex[0] > 15 and hex[0] < 19 and hex[1] < -2 and hex[1] > -5) or (hex[0] > 20 and hex[0] < 23 and hex[2] > -16) or (hex[0] > 18 and hex[0] < 21 and hex[2] < -13 and hex[2] > -16):
+            return True
+        return False
+    
+
+    @staticmethod
+    def mn_level_6(hex):
+        if (hex[0] > 15 and hex[0] < 18 and hex[1] < -4) or (hex[0] > 17 and hex[0] < 19 and hex[1] < -4 and hex[1] > -7) or (hex[0] > 18 and hex[0] < 21 and hex[2] > -14) or (hex[0] > 16 and hex[0] < 19 and hex[2] < -11 and hex[2] > -14) or hex == (18, -7, -11):
+            return True
+        return False
+    
+
+    def create_mn_level_dict(hexes):
+        minas_tirith = {}
+        mn_level_1 = {}
+        mn_level_2 = {}
+        mn_level_3 = {}
+        mn_level_4 = {}
+        mn_level_5 = {}
+        mn_level_6 = {}
+
+        for coord, hex_obj in hexes.items():
+            if GameLogic.minas_tirith(coord):
+                minas_tirith[coord] = hex_obj
+            if GameLogic.mn_level_1(coord):
+                mn_level_1[coord] = hex_obj
+            if GameLogic.mn_level_2(coord):
+                mn_level_2[coord] = hex_obj
+            if GameLogic.mn_level_3(coord):
+                mn_level_3[coord] = hex_obj
+            if GameLogic.mn_level_4(coord):
+                mn_level_4[coord] = hex_obj
+            if GameLogic.mn_level_5(coord):
+                mn_level_5[coord] = hex_obj
+            if GameLogic.mn_level_6(coord):
+                mn_level_6[coord] = hex_obj
+
+        return {
+            "minas_tirith": minas_tirith,
+            "mn_level_1": mn_level_1,
+            "mn_level_2": mn_level_2,
+            "mn_level_3": mn_level_3,
+            "mn_level_4": mn_level_4,
+            "mn_level_5": mn_level_5,
+            "mn_level_6": mn_level_6,
+        }
+    
     
     @staticmethod
     def get_matching_coords(hex_dict, check_func):
@@ -94,9 +179,10 @@ class GameLogic(object):
     def validate_deploy_hex(site, phaze, qrs):
         if site == 'C' and phaze == 0:
             return GameLogic.deploy0_right_hex_S(qrs)
+     #   elif site == 'Z' and phaze == 0:
+       #     return GameLogic.deploy0_right_hex_W(qrs) 
         elif site == 'Z' and phaze == 0:
-            return GameLogic.deploy0_right_hex_W(qrs) 
-
+            return GameLogic.minas_tirith(qrs)
 
     @staticmethod
     def get_unit_by_id(unit_id, player_1, player_2):
@@ -272,4 +358,23 @@ class GameLogic(object):
                 deployed = False
                 break
         return deployed
-        
+
+
+    @staticmethod
+    def move_range(qrs, hexes, ran):
+        range_hexes = set()
+
+        q_base, r_base, s_base = qrs
+
+        for dq in range(-ran, ran + 1):
+            for dr in range(max(-ran, -dq - ran), min(ran, -dq + ran) + 1):
+                ds = -dq - dr
+                q = q_base + dq
+                r = r_base + dr
+                s = s_base + ds
+                if (q, r, s) in hexes:
+                    range_hexes.add((q, r, s))
+
+        return range_hexes
+    
+
