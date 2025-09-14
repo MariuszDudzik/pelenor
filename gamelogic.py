@@ -179,10 +179,9 @@ class GameLogic(object):
     def validate_deploy_hex(site, phaze, qrs):
         if site == 'C' and phaze == 0:
             return GameLogic.deploy0_right_hex_S(qrs)
-     #   elif site == 'Z' and phaze == 0:
-       #     return GameLogic.deploy0_right_hex_W(qrs) 
         elif site == 'Z' and phaze == 0:
-            return GameLogic.minas_tirith(qrs)
+            return GameLogic.deploy0_right_hex_W(qrs) 
+        
 
     @staticmethod
     def get_unit_by_id(unit_id, player_1, player_2):
